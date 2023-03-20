@@ -1,0 +1,161 @@
+$track-color: #424242
+$thumb-color: #555bc8
+
+$thumb-radius: 8px
+$thumb-height: 30px
+$thumb-width: 30px
+$thumb-shadow-size: 1px
+$thumb-shadow-blur: 1px
+$thumb-shadow-color: #111
+$thumb-border-width: 1px
+$thumb-border-color: white
+
+$track-width: 100%
+$track-height: 10px
+$track-shadow-size: 2px
+$track-shadow-blur: 2px
+$track-shadow-color: #222
+$track-border-width: 1px
+$track-border-color: black
+
+$track-radius: 5px
+$contrast: 5%
+
+=track
+  width: $track-width
+  height: $track-height
+  cursor: pointer
+
+=thumb
+  border: $thumb-border-width solid $thumb-border-color
+  height: $thumb-height
+  width: $thumb-width
+  border-radius: $thumb-radius
+  background: $thumb-color
+  cursor: pointer
+
+input[type=range]
+  -webkit-appearance: none
+  margin: $thumb-height/2 0
+  width: $track-width
+
+  &:focus
+    outline: none
+
+  &::-webkit-slider-runnable-track
+    +track()
+    background: $track-color
+    border-radius: $track-radius
+    border: $track-border-width solid $track-border-color
+
+  &::-webkit-slider-thumb
+    +thumb()
+    -webkit-appearance: none
+    margin-top: ((-$track-border-width * 2 + $track-height) / 2) - ($thumb-height / 2)
+
+  &:focus::-webkit-slider-runnable-track
+    background: lighten($track-color, $contrast)
+
+  &::-moz-range-track
+    +track()
+    background: $track-color
+    border-radius: $track-radius
+    border: $track-border-width solid $track-border-color
+
+  &::-moz-range-thumb
+    +thumb()
+
+  &::-ms-track
+    +track()
+    background: transparent
+    border-color: transparent
+    border-width: $thumb-width 0
+    color: transparent
+
+  &::-ms-fill-lower
+    background: darken($track-color, $contrast)
+    border: $track-border-width solid $track-border-color
+    border-radius: $track-radius*2
+
+  &::-ms-fill-upper
+    background: $track-color
+    border: $track-border-width solid $track-border-color
+    border-radius: $track-radius*2
+
+  &::-ms-thumb
+    +thumb()
+
+  &:focus::-ms-fill-lower
+    background: $track-color
+
+  &:focus::-ms-fill-upper
+    background: lighten($track-color, $contrast)
+
+.rangeslider
+  position: relative
+  display: block
+  cursor: pointer
+  height: 25px
+  width: 100%
+  &__fill
+    background: #F99205
+  &__tooltip
+    padding: 5px 10px
+    display: inline-flex
+    justify-content: center
+    align-items: center
+    white-space: nowrap
+    position: absolute
+    top: -43px
+    width: 50px
+    background: #4E555E
+    -webkit-border-radius: 4px
+    -moz-border-radius: 4px
+    border-radius: 4px
+    font-size: 12px
+    font-family: Circe, sans-serif
+    color: #ffffff
+    line-height: 1
+    -webkit-transform: translateX(-50%)
+    -moz-transform: translateX(-50%)
+    -ms-transform: translateX(-50%)
+    -o-transform: translateX(-50%)
+    transform: translateX(-50%)
+
+.rangeslider__fill, .rangeslider__fill__bg, .rangeslider__handle
+  display: block
+  position: absolute
+  top: 50%
+  height: 2px
+  z-index: 2
+  will-change: width
+
+
+.rangeslider__handle
+  width: 1.2em
+  height: 1.2em
+  -webkit-border-radius: 50%
+  -moz-border-radius: 50%
+  border-radius: 50%
+  border: 2px solid #F99205
+  background: #2B2F34
+  top: 50%
+  -moz-transform: translateY(-50%)
+  -ms-transform: translateY(-50%)
+  -o-transform: translateY(-50%)
+  -webkit-transform: translateY(-50%)
+  transform: translateY(-50%)
+  ::before
+
+
+.rangeslider__handle:active
+  background: #F99205
+
+
+.rangeslider__fill__bg
+  background: #ccc
+  width: 100%
+
+
+.rangeslider--disabled
+  opacity: .4
