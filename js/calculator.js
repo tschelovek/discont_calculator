@@ -33,8 +33,9 @@ let state = {
     },
     totalCost: 0
 }
-console.log(state)
 
+const buttonPodlozhka = document.getElementById('podlozhka_active');
+const podlozhkaCalculator = document.getElementById('podlozhka_more');
 const widthRangeInput = document.getElementById('podlozhka_width_range');
 const widthNumberInput = document.getElementById('podlozhka_width_input');
 const heightRangeInput = document.getElementById('podlozhka_height_range');
@@ -45,6 +46,12 @@ const checkboxCarcass = document.getElementById('podlozhka_carcass');
 const checkboxFilm = document.getElementById('podlozhka_film');
 const costPodlozhkaOutput = document.getElementById('podlozhka_cost');
 const costOverallOutput = document.getElementById('leters_podlozhka_cost');
+const callbackInputType = document.getElementById('letter_form_id_podlozhka_type');
+const callbackInputWidth = document.getElementById('letter_form_id_podlozhka_width');
+const callbackInputHeight = document.getElementById('letter_form_id_podlozhka_height');
+const callbackInputFrame = document.getElementById('letter_form_id_podlozhka_opt_frame');
+const callbackInputFilm = document.getElementById('letter_form_id_podlozhka_opt_film');
+const callbackInputSum = document.getElementById('letter_form_id_podlozhka_sum');
 const widthTooltip = document.createElement('div');
 const heightTooltip = document.createElement('div');
 
@@ -61,62 +68,76 @@ function parseResponseString(string) {
     return parsed
 }
 
-document.getElementById('podlozhka_active').addEventListener('click', () => {
-    const data = parseResponseString(dataString)
-    setUpPrice(data, 'pvh');
+function initPodlozhkaCalc() {
+    checkboxPvh.click();
 
     rangesliderJs.create(widthRangeInput, {
         min: state.pvh.minWidth || 20,
         max: state.pvh.maxWidth || 500,
         value: 50,
         step: 1,
-        onSlide: (value, percent, position) => widthHandler(value, percent, position)
+        onSlide: (value) => handlerWidthRangeInput(value)
     });
     rangesliderJs.create(heightRangeInput, {
         min: state.pvh.minHeight || 20,
         max: state.pvh.maxHeight || 500,
         value: 50,
         step: 1,
-        onSlide: (value, percent, position) => heightHandler(value, percent, position)
+        onSlide: (value) => handlerHeightRangeInput(value)
     });
     addTooltips()
-})
-widthNumberInput.addEventListener('input', e => widthRangeInput['rangeslider-js'].update({value: e.target.value}))
-heightNumberInput.addEventListener('input', e => heightRangeInput['rangeslider-js'].update({value: e.target.value}))
-
-checkboxCarcass.addEventListener('change', (e) => {
-    if (!state.carcass.price) {
-        // const path = e.target.dataset.source;
-        // state.carcassPrice = getPriceString(path).then(res => parseResponseString(res));
-        const data = parseResponseString(dataString)
-
-        setUpPrice(data, 'carcass');
-    }
-
-    // if (minWidth !== state.minWidth || maxWidth !== state.maxWidth) {
-    //     state.minWidth = minWidth;
-    //     state.maxWidth = maxWidth;
-    //     widthRangeInput['rangeslider-js'].update({
-    //         min: state.minWidth,
-    //         max: state.maxWidth,
-    //         value: state.minWidth,
-    //     })
-    // }
-    console.log(state)
-    // calculatePodlozhka()
-})
-
-
-function widthHandler(value, percent, position) {
-    widthNumberInput.value = value;
-    widthTooltip.textContent = value;
-    calculatePodlozhka()
 }
 
-function heightHandler(value, percent, position) {
+buttonPodlozhka.addEventListener('click', () => {
+    podlozhkaCalculator.classList.toggle('active');
+    if (!buttonPodlozhka.checked) {
+        [
+            callbackInputType,
+            callbackInputWidth,
+            callbackInputHeight,
+            callbackInputFrame,
+            callbackInputFilm,
+            callbackInputSum,
+        ].forEach(input => input.value = '')
+    }
+})
+widthNumberInput.addEventListener('input', e => handlerWidthInputNumber(e.target.value))
+heightNumberInput.addEventListener('input', e => handlerHeightInputNumber(e.target.value))
+checkboxPvh.addEventListener('change', e => handlerCheckbox(e, 'pvh'))
+checkboxFigure.addEventListener('change', e => handlerCheckbox(e, 'figure'))
+checkboxCarcass.addEventListener('change', e => handlerCheckbox(e, 'carcass'))
+checkboxFilm.addEventListener('change', e => handlerCheckbox(e, 'film'))
+
+function handlerCheckbox(event, name) {
+    if (!state[name].price) {
+        // getPriceString(event.target.dataset.source)
+        //     .then(res => setUpPrice(parseResponseString(res), name));
+        setUpPrice(parseResponseString(dataString), name);
+    }
+    calculatePodlozhka();
+}
+
+function handlerWidthRangeInput(value) {
+    widthNumberInput.value = value;
+    widthTooltip.textContent = value;
+    calculatePodlozhka();
+}
+function handlerHeightRangeInput(value) {
     heightNumberInput.value = value;
     heightTooltip.textContent = value;
-    calculatePodlozhka()
+    calculatePodlozhka();
+}
+function handlerWidthInputNumber(value) {
+    if (value > state.pvh.maxWidth ) value = state.pvh.maxWidth;
+    if (!value || value < state.pvh.minWidth) value = state.pvh.minWidth;
+    widthRangeInput['rangeslider-js'].update({ value: value });
+    handlerWidthRangeInput(value)
+}
+function handlerHeightInputNumber(value) {
+    if (value > state.pvh.maxHeight ) value = state.pvh.maxHeight;
+    if (!value || value < state.pvh.minHeight) value = state.pvh.minHeight;
+    heightRangeInput['rangeslider-js'].update({ value: value });
+    handlerHeightRangeInput(value)
 }
 
 function findMinMax(arr, dimension) {
@@ -136,22 +157,27 @@ function setUpPrice(data, key) {
         maxWidth: maxWidth,
         minHeight: minHeight,
         maxHeight: maxHeight,
-        // widths: [],
-        // heights: [],
     })
 }
 
 function calculatePodlozhka() {
     let totalCost = 0
-    if (checkboxCarcass.checked) {
-        // const price = [];
-        // state.carcass.price.map((current) => {
-        //     if (current.width >= widthRangeInput.value && current.height >= heightRangeInput.value) {
-        //         price.push(current)
-        //     }
-        // })
-        totalCost += findPrice('carcass')
-    }
+    checkboxPvh.checked ? totalCost += findPrice('pvh') : null;
+    checkboxFigure.checked ? totalCost += findPrice('figure') : null;
+    checkboxCarcass.checked ? totalCost += findPrice('carcass') : null;
+    checkboxFilm.checked ? totalCost += findPrice('film') : null;
+    state.totalCost = totalCost;
+    printCost();
+    fillCallbackForm();
+}
+
+function fillCallbackForm() {
+    // callbackInputType.value = checkboxPvh.checked ? 'ПВХ и акрил' : 'Фигурный';
+    // callbackInputWidth.value = widthRangeInput.value;
+    // callbackInputHeight.value = heightRangeInput.value;
+    // callbackInputFrame.value = checkboxCarcass.checked ? 'Да' : 'Нет';
+    // callbackInputFilm.value = checkboxFilm.checked ? 'Да' : 'Нет';
+    // callbackInputSum.value = state.totalCost;
 }
 
 function findPrice(priceName = '') {
@@ -168,3 +194,11 @@ function addTooltips() {
     heightTooltip.classList.add('rangeslider__tooltip');
     heightTooltip.textContent = heightRangeInput.value;
 }
+
+function printCost() {
+    const lettersCost = document.getElementById('print__let__sum').textContent;
+    costOverallOutput.textContent = (parseInt(lettersCost.replace(/\s+/g, '')) + parseInt(state.totalCost)).toString();
+    costPodlozhkaOutput.textContent = state.totalCost;
+}
+
+initPodlozhkaCalc()

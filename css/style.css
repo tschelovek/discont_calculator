@@ -148,4 +148,11 @@ input[type=range]:focus::-ms-fill-upper {
   opacity: 0.4;
 }
 
+.podlozhka__more {
+  display: none;
+}
+.podlozhka__more.active {
+  display: block;
+}
+
 /*# sourceMappingURL=style.css.map */
