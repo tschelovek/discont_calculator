@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+<!--    <link rel="stylesheet" href="../css/range.min.css">-->
+    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="./main.js"></script>
+
+    <div>
+      <span id="print__let__sum" data-sum="sum">7&nbsp;800</span>₽
+    </div>
+
+    <div>
+      <input type="checkbox" name="podlozhka_active" id="podlozhka_active">
+      <label for="podlozhka_active">
+        <div class="checkbox__toggle">
+          <div class="checkbox__toggle__marker"></div>
+        </div>
+        Подложка
+      </label>
+    </div>
+
+    <div class="podlozhka__more" id="podlozhka_more">
+
+      <div class="podlozhka__wrapper">
+
+        <div class="calc__radio">
+          <input type="radio" class="calc_radio" name="podlozhka__type" id="podlozhka_radio_0" value="./images/prices/koroba-new/kleennye_pvh_i_akril_skidka15.xls">
+          <label class="calc__label_0" data-title="Короб из ПВХ и акрила" data-desc="Световые короба из ПВХ и акрила используются как на улице, так и в интерьере. Основными материалами для изготовления корпуса являются листовой пластик (ПВХ) и акриловое оргстекло. Световая поверхность оклеивается светопропускающей пленкой в нужный цвет, а для подсветки используются светодиодныемодули." for="podlozhka_radio_0">
+            ПВХ и акрил                                <a href="#">Узнать подробнее</a>
+          </label>
+          <input type="radio" class="calc_radio" name="podlozhka__type" id="podlozhka_radio_1" value="./images/prices/koroba-new/slozhnoi_formy_skidka15.xls">
+          <label class="calc__label_1" data-title="Фигурный короб" data-desc="Эту технологию часто используют для изготовления светового логотипа компании или написания текста с яркой контрастной обводкой. Основными материалами корпуса являются листовой пластик (ПВХ) и акрил. Четкие грани короба, отсутствие окантовочных профилей и возможность варьировать глубину от 7 до 20 см создают презентабельный вид этой конструкции" for="podlozhka_radio_1">
+            Фигурный                                <a href="#">Узнать подробнее</a>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <h3>Ширина</h3><br>
+        <input type="range" id="podlozhka_width_range">
+        <input class="rangeslider__input" id="podlozhka_width_input" type="number" value="20">
+      </div>
+      <div>
+        <h3>Высота</h3><br>
+        <input type="range" id="podlozhka_height_range">
+        <input class="rangeslider__input" id="podlozhka_height_input" type="number" value="20">
+      </div>
+
+      <div>
+        <input type="checkbox" name="face" id="podlozhka_carcass"
+               data-sourse="./images/prices/koroba-new/kompozit_s_inkrustaciei_skidka15.xls">
+        <label for="podlozhka_carcass">
+          <div class="checkbox__toggle">
+            <div class="checkbox__toggle__marker"></div>
+          </div>
+          Металлический каркас
+        </label>
+      </div>
+      <div>
+        <input type="checkbox" name="face" id="podlozhka_film" data-sourse="./images/prices/koroba-new/kompozit_s_inkrustaciei_skidka15.xls">
+        <label for="podlozhka_film">
+          <div class="checkbox__toggle">
+            <div class="checkbox__toggle__marker"></div>
+          </div>
+          Оклейка плёнкой
+        </label>
+      </div>
+
+      <div class="print__calc__sum print__let__sum">
+        <div>
+          <h2>Стоимость подложки:</h2>
+          <div>
+            <span id="podlozhka_cost" data-sum="sum">0</span>₽
+          </div>
+        </div>
+
+        <div>
+          <h2>Общая стоимость:</h2>
+          <div>
+            <span id="leters_podlozhka_cost" data-sum="sum">0</span>₽
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

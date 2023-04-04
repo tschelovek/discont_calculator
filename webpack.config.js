@@ -1,10 +1,10 @@
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
-module.exports = {
-    mode: 'production',
+module.exports = (env) => ({
     entry: './js/calculator.js',
     output: {
-        filename: 'main.js',
+        filename: 'script_dev.js',
         path: path.resolve(__dirname, 'dist'),
         clean: true,
     },
@@ -16,10 +16,22 @@ module.exports = {
                 use: {
                     loader: "babel-loader",
                     options: {
-                        presets: ['@babel/preset-env']
+                        presets: [
+                            ['@babel/preset-env', { targets: "defaults" }]
+                        ]
                     }
                 }
             }
         ]
-    }
-};
+    },
+    devServer: {
+        static: {
+            directory: path.join(__dirname, 'public'),
+        },
+        compress: true,
+        port: 9000,
+    },
+    // plugins: [
+    //     new HtmlWebpackPlugin(),
+    // ],
+})
