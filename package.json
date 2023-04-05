@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev_w": "webpack serve --mode=development",
-    "build_w": "webpack --mode=production --env prod",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build_w": "webpack --mode=production --env prod"
   },
   "author": "",
   "license": "ISC",

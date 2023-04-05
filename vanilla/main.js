@@ -1,9 +1,4 @@
 import rangesliderJs from 'rangeslider-js';
-import {dataArr} from "./js/storage";
-
-dataArr.reverse()
-
-console.log(dataArr)
 
 document.addEventListener('DOMContentLoaded', () => {
     let state = {
@@ -39,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const buttonPodlozhka = document.getElementById('podlozhka_active');
+    const lettersCalculatorCost = document.getElementById('print__let__sum');
     const podlozhkaCalculator = document.getElementById('podlozhka_more');
     const widthRangeInput = document.getElementById('podlozhka_width_range');
     const widthNumberInput = document.getElementById('podlozhka_width_input');
@@ -58,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const callbackInputSum = document.getElementById('letter_form_id_podlozhka_sum');
     const widthTooltip = document.createElement('div');
     const heightTooltip = document.createElement('div');
+    const lettersCalcSumObserver = new MutationObserver(calculatePodlozhka)
 
     function parseResponseString(string) {
         let parsed = [];
@@ -85,11 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initPodlozhkaCalc() {
-        // getPriceString(checkboxPvh.dataset.source)
-        //     .then(res => {
-        //         setUpPrice(parseResponseString(res.result), 'pvh');
+        getPriceString(checkboxPvh.dataset.source)
+            .then(res => {
 
-                setUpPrice(dataArr, 'pvh');
+                setUpPrice(parseResponseString(res.result), 'pvh');
 
                 rangesliderJs.create(widthRangeInput, {
                     min: state.pvh.minWidth,
@@ -111,47 +107,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 checkboxPvh.click()
 
-            // })
-            // .catch(err => console.error(err.message));
+            })
+            .catch(err => console.error(err.message));
     }
-
-    buttonPodlozhka.addEventListener('click', () => {
-        podlozhkaCalculator.classList.toggle('active');
-        if (!widthRangeInput.closest('div').querySelector('.rangeslider')) initPodlozhkaCalc();
-        if (!buttonPodlozhka.checked) {
-            [
-                callbackInputType,
-                callbackInputWidth,
-                callbackInputHeight,
-                callbackInputFrame,
-                callbackInputFilm,
-                callbackInputSum,
-            ].forEach(input => input.value = '')
-        }
-    })
-    widthNumberInput.addEventListener('input', e => handlerWidthInputNumber(e.target.value))
-    heightNumberInput.addEventListener('input', e => handlerHeightInputNumber(e.target.value))
-    checkboxPvh.addEventListener('change', e => handlerCheckbox(e.target, 'pvh'))
-    checkboxFigure.addEventListener('change', e => handlerCheckbox(e.target, 'figure'))
-    checkboxCarcass.addEventListener('change', e => handlerCheckbox(e.target, 'carcass'))
-    checkboxFilm.addEventListener('change', e => handlerCheckbox(e.target, 'film'))
 
     function handlerCheckbox(eventTarget, name) {
         if (!state[name].price) {
-
-            // getPriceString(eventTarget.dataset.source)
-            //     .then(res => {
-            //         setUpPrice(parseResponseString(res.result), name);
-            //         calculatePodlozhka();
-            //     })
-            //     .catch(err => console.error(err.message));
-
-            setUpPrice(dataArr, name)
+            getPriceString(eventTarget.dataset.source)
+                .then(res => {
+                    setUpPrice(parseResponseString(res.result), name);
+                    calculatePodlozhka();
+                })
+                .catch(err => console.error(err.message));
             return
 
         }
         calculatePodlozhka();
-        console.log(state)
     }
 
     function handlerWidthRangeInput(value) {
@@ -247,8 +218,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function printCost() {
-        const lettersCost = document.getElementById('print__let__sum').textContent;
+        const lettersCost = lettersCalculatorCost.textContent;
         costOverallOutput.textContent = (parseInt(lettersCost.replace(/\s+/g, '')) + parseInt(state.totalCost)).toString();
         costPodlozhkaOutput.textContent = state.totalCost;
     }
+
+    buttonPodlozhka.addEventListener('click', () => {
+        podlozhkaCalculator.classList.toggle('active');
+        if (!widthRangeInput.closest('div').querySelector('.rangeslider')) initPodlozhkaCalc();
+        if (buttonPodlozhka.checked) {
+            lettersCalcSumObserver.observe(lettersCalculatorCost, { characterData: true, subtree: true, childList: true })
+        } else {
+            lettersCalcSumObserver.disconnect();
+            podlozhkaCalculator.classList.remove('active');
+
+            [
+                callbackInputType,
+                callbackInputWidth,
+                callbackInputHeight,
+                callbackInputFrame,
+                callbackInputFilm,
+                callbackInputSum,
+            ].forEach(input => input.value = '')
+        }
+    })
+    widthNumberInput.addEventListener('input', e => handlerWidthInputNumber(e.target.value))
+    heightNumberInput.addEventListener('input', e => handlerHeightInputNumber(e.target.value))
+    checkboxPvh.addEventListener('change', e => handlerCheckbox(e.target, 'pvh'))
+    checkboxFigure.addEventListener('change', e => handlerCheckbox(e.target, 'figure'))
+    checkboxCarcass.addEventListener('change', e => handlerCheckbox(e.target, 'carcass'))
+    checkboxFilm.addEventListener('change', e => handlerCheckbox(e.target, 'film'))
 })

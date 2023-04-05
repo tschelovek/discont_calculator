@@ -2,7 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
 module.exports = (env) => ({
-    entry: './js/calculator.js',
+    entry: './vanilla/main.js',
     output: {
         filename: 'script_dev.js',
         path: path.resolve(__dirname, 'dist'),
@@ -31,7 +31,4 @@ module.exports = (env) => ({
         compress: true,
         port: 9000,
     },
-    // plugins: [
-    //     new HtmlWebpackPlugin(),
-    // ],
 })
