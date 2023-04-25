@@ -1,9 +1,13 @@
+const {existsSync, readFileSync, writeFileSync} = require('fs');
+const {createServer} = require('http');
+
 // файл для базы данных
 const DB_FILE = process.env.DB_FILE || './db.json';
 // номер порта, на котором будет запущен сервер
 const PORT = process.env.PORT || 3069;
 // префикс URI для всех методов приложения
-const URI_PREFIX = '/api/clients';
+const URI_PREFIX = '';
+// const URI_PREFIX = 'http://localhost:3069';
 
 /**
  * Класс ошибки, используется для отправки ответа с определённым кодом и описанием ошибки
@@ -16,14 +20,77 @@ class ApiError extends Error {
     }
 }
 
-function getClient(itemId) {
-    const client = getClientList().find(({id}) => id === itemId);
-    if (!client) throw new ApiError(404, {message: 'Client Not Found'});
-    return client;
+if (!existsSync(DB_FILE)) {
+    import('../vanilla/js/storage.js').then(res => {
+        const {dataString} = res || '';
+
+        writeFileSync(
+            DB_FILE,
+            JSON.stringify([
+                {
+                    flat: dataString,
+                    flat_frame: modifyPriceListString(dataString, 1000),
+                    flat_film: modifyPriceListString(dataString, 3000),
+                    flat_frame_film: modifyPriceListString(dataString, 5000),
+                    cassette: modifyPriceListString(dataString, 10000),
+                    cassette_frame: modifyPriceListString(dataString, 20000),
+                    cassette_film: modifyPriceListString(dataString, 30000),
+                    cassette_frame_film: modifyPriceListString(dataString, 40000),
+                },
+            ]),
+            // JSON.stringify([
+            //     {
+            //         priceName: 'flat',
+            //         price: dataString,
+            //     },
+            //     {
+            //         priceName: 'flat_frame',
+            //         price: modifyPriceListString(dataString, 1000),
+            //     },
+            //     {
+            //         priceName: 'flat_film',
+            //         price: modifyPriceListString(dataString, 3000),
+            //     },
+            //     {
+            //         priceName: 'flat_frame_film',
+            //         price: modifyPriceListString(dataString, 5000),
+            //     },
+            //     {
+            //         priceName: 'cassette',
+            //         price: modifyPriceListString(dataString, 10000),
+            //     },
+            //     {
+            //         priceName: 'cassette_frame',
+            //         price: modifyPriceListString(dataString, 20000),
+            //     },
+            //     {
+            //         priceName: 'cassette_film',
+            //         price: modifyPriceListString(dataString, 30000),
+            //     },
+            //     {
+            //         priceName: 'cassette_frame_film',
+            //         price: modifyPriceListString(dataString, 40000),
+            //     },
+            // ]),
+            {encoding: 'utf8'})
+    })
 }
 
-// создаём новый файл с базой данных, если он не существует
-if (!existsSync(DB_FILE)) writeFileSync(DB_FILE, '[]', {encoding: 'utf8'});
+function modifyPriceListString(string, modifier) {
+    return string.split('|').reduce((accumulator, current, index) => {
+        let temp = current.split('-');
+        if (index === 0) return accumulator.concat(`${temp[0]}-${temp[1]}-${parseInt(temp[2]) + modifier}`);
+        return accumulator.concat(`|${temp[0]}-${temp[1]}-${parseInt(temp[2]) + modifier}`)
+    }, '')
+}
+
+function getPrices(params) {
+    const prices = JSON.parse(readFileSync(DB_FILE) || '[]');
+    if (params) {
+        return prices[0][params]
+    }
+    return prices
+}
 
 module.exports = createServer(async (req, res) => {
     // req - объект с информацией о запросе, res - объект для управления отправляемым ответом
@@ -43,16 +110,18 @@ module.exports = createServer(async (req, res) => {
         res.end();
         return;
     }
+    // console.log(`req.url: ${req.url}`)
 
     // если URI не начинается с нужного префикса - можем сразу отдать 404
-    if (!req.url || !req.url.startsWith(URI_PREFIX)) {
-        res.statusCode = 404;
-        res.end(JSON.stringify({message: 'Not Found'}));
-        return;
-    }
+    // if (!req.url || !req.url.startsWith(URI_PREFIX)) {
+    //     res.statusCode = 404;
+    //     res.end(JSON.stringify({message: 'Not Found'}));
+    //     return;
+    // }
 
     // убираем из запроса префикс URI, разбиваем его на путь и параметры
-    const [uri, query] = req.url.substr(URI_PREFIX.length).split('?');
+    const [uri, query] = req.url.substring(URI_PREFIX.length).split('?');
+    console.log(`uri: ${uri}`)
     const queryParams = {};
 
     // параметры могут отсутствовать вообще или иметь вид a=b&b=c
@@ -68,22 +137,10 @@ module.exports = createServer(async (req, res) => {
         // обрабатываем запрос и формируем тело ответа
         const body = await (async () => {
             if (uri === '' || uri === '/') {
-                // /api/clients
-                if (req.method === 'GET') return getClientList(queryParams);
-                if (req.method === 'POST') {
-                    const createdItem = createClient(await drainJson(req));
-                    res.statusCode = 201;
-                    res.setHeader('Access-Control-Expose-Headers', 'Location');
-                    res.setHeader('Location', `${URI_PREFIX}/${createdItem.id}`);
-                    return createdItem;
-                }
+                if (req.method === 'GET') return getPrices();
             } else {
-                // /api/clients/{id}
-                // параметр {id} из URI запроса
-                const itemId = uri.substr(1);
-                if (req.method === 'GET') return getClient(itemId);
-                if (req.method === 'PATCH') return updateClient(itemId, await drainJson(req));
-                if (req.method === 'DELETE') return deleteClient(itemId);
+                const itemId = req.url.substring(1);
+                if (req.method === 'GET') return getPrices(itemId);
             }
             return null;
         })();
@@ -106,14 +163,6 @@ module.exports = createServer(async (req, res) => {
         if (process.env.NODE_ENV !== 'test') {
             console.log(`Сервер CRM запущен. Вы можете использовать его по адресу http://localhost:${PORT}`);
             console.log('Нажмите CTRL+C, чтобы остановить сервер');
-            console.log('Доступные методы:');
-            console.log(`GET ${URI_PREFIX} - получить список клиентов, в query параметр search можно передать поисковый запрос`);
-            console.log(`POST ${URI_PREFIX} - создать клиента, в теле запроса нужно передать объект { name: string, surname: string, lastName?: string, contacts?: object[] }`);
-            console.log(`\tcontacts - массив объектов контактов вида { type: string, value: string }`);
-            console.log(`GET ${URI_PREFIX}/{id} - получить клиента по его ID`);
-            console.log(`PATCH ${URI_PREFIX}/{id} - изменить клиента с ID, в теле запроса нужно передать объект { name?: string, surname?: string, lastName?: string, contacts?: object[] }`);
-            console.log(`\tcontacts - массив объектов контактов вида { type: string, value: string }`);
-            console.log(`DELETE ${URI_PREFIX}/{id} - удалить клиента по ID`);
         }
     })
     // ...и вызываем запуск сервера на указанном порту

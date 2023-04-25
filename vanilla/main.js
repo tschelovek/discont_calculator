@@ -1,36 +1,65 @@
-import rangesliderJs from 'rangeslider-js';
+// import rangesliderJs from 'rangeslider-js';
 
 document.addEventListener('DOMContentLoaded', () => {
     let state = {
-        pvh: {
+        flat: {
             price: undefined,
             minWidth: 0,
             maxWidth: 10,
             minHeight: 0,
             maxHeight: 10,
         },
-        figure: {
+        flat_frame: {
             price: undefined,
             minWidth: 0,
             maxWidth: 10,
             minHeight: 0,
             maxHeight: 10,
         },
-        carcass: {
+        flat_film: {
             price: undefined,
             minWidth: 0,
             maxWidth: 10,
             minHeight: 0,
             maxHeight: 10,
         },
-        film: {
+        flat_frame_film: {
             price: undefined,
             minWidth: 0,
             maxWidth: 10,
             minHeight: 0,
             maxHeight: 10,
         },
-        totalCost: 0
+        cassette: {
+            price: undefined,
+            minWidth: 0,
+            maxWidth: 10,
+            minHeight: 0,
+            maxHeight: 10,
+        },
+        cassette_frame: {
+            price: undefined,
+            minWidth: 0,
+            maxWidth: 10,
+            minHeight: 0,
+            maxHeight: 10,
+        },
+        cassette_film: {
+            price: undefined,
+            minWidth: 0,
+            maxWidth: 10,
+            minHeight: 0,
+            maxHeight: 10,
+        },
+        cassette_frame_film: {
+            price: undefined,
+            minWidth: 0,
+            maxWidth: 10,
+            minHeight: 0,
+            maxHeight: 10,
+        },
+        totalCost: 0,
+        currentPriceList: '',
     }
 
     const buttonPodlozhka = document.getElementById('podlozhka_active');
@@ -40,9 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const widthNumberInput = document.getElementById('podlozhka_width_input');
     const heightRangeInput = document.getElementById('podlozhka_height_range');
     const heightNumberInput = document.getElementById('podlozhka_height_input');
-    const checkboxPvh = document.getElementById('podlozhka_radio_0');
-    const checkboxFigure = document.getElementById('podlozhka_radio_1');
-    const checkboxCarcass = document.getElementById('podlozhka_carcass');
+    const checkboxFlat = document.getElementById('podlozhka_radio_0');
+    const checkboxCassette = document.getElementById('podlozhka_radio_1');
+    const checkboxFrame = document.getElementById('podlozhka_carcass');
     const checkboxFilm = document.getElementById('podlozhka_film');
     const costPodlozhkaOutput = document.getElementById('podlozhka_cost');
     const costOverallOutput = document.getElementById('leters_podlozhka_cost');
@@ -54,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const callbackInputSum = document.getElementById('letter_form_id_podlozhka_sum');
     const widthTooltip = document.createElement('div');
     const heightTooltip = document.createElement('div');
-    const lettersCalcSumObserver = new MutationObserver(calculatePodlozhka)
+    const lettersCalcSumObserver = new MutationObserver(calculatePodlozhka);
 
     function parseResponseString(string) {
         let parsed = [];
@@ -69,10 +98,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return parsed.reverse()
     }
 
+    // function getPriceString(path) {
+    //     return fetch(`/udata/custom/readCalc/(${path}).json`, {
+    //         method: "GET",
+    //         credentials: "same-origin",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //         },
+    //     })
+    //         .then(res => res.json())
+    //         .then(res => res.result)
+    //         .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
+    // }
     function getPriceString(path) {
-        return fetch(`/udata/custom/readCalc/(${path}).json`, {
+        return fetch(path, {
             method: "GET",
-            credentials: "same-origin",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -82,46 +122,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initPodlozhkaCalc() {
-        getPriceString(checkboxPvh.dataset.source)
+        getPriceString(checkboxFlat.dataset.flat)
             .then(res => {
 
-                setUpPrice(parseResponseString(res.result), 'pvh');
+                setUpPrice(parseResponseString(res), 'flat');
 
                 rangesliderJs.create(widthRangeInput, {
-                    min: state.pvh.minWidth,
-                    max: state.pvh.maxWidth,
-                    value: state.pvh.minWidth,
+                    min: state.flat.minWidth,
+                    max: state.flat.maxWidth,
+                    value: state.flat.minWidth,
                     step: 1,
                     onInit: (value) => widthNumberInput.value = value,
                     onSlide: (value) => handlerWidthRangeInput(value)
                 });
                 rangesliderJs.create(heightRangeInput, {
-                    min: state.pvh.minHeight,
-                    max: state.pvh.maxHeight,
-                    value: state.pvh.minHeight,
+                    min: state.flat.minHeight,
+                    max: state.flat.maxHeight,
+                    value: state.flat.minHeight,
                     step: 1,
                     onInit: (value) => widthNumberInput.value = value,
                     onSlide: (value) => handlerHeightRangeInput(value)
                 });
-                addTooltips()
+                addTooltips();
 
-                checkboxPvh.click()
+                state.currentPriceList = 'flat';
+                checkboxFlat.click();
 
             })
             .catch(err => console.error(err.message));
     }
 
-    function handlerCheckbox(eventTarget, name) {
-        if (!state[name].price) {
-            getPriceString(eventTarget.dataset.source)
+    function handlerCheckbox() {
+        const priceName = `${checkboxFlat.checked ? 'flat' : 'cassette'}${checkboxFrame.checked ? '_frame' : ''}${checkboxFilm.checked ? '_film' : ''}`
+        state.currentPriceList = priceName;
+
+        if (!state[priceName].price) {
+            getPriceString(checkboxFlat.dataset[priceName])
                 .then(res => {
-                    setUpPrice(parseResponseString(res.result), name);
+                    setUpPrice(parseResponseString(res), priceName);
                     calculatePodlozhka();
                 })
                 .catch(err => console.error(err.message));
             return
-
         }
+
         calculatePodlozhka();
     }
 
@@ -139,14 +183,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handlerWidthInputNumber(value) {
         if (value > state.pvh.maxWidth) value = state.pvh.maxWidth;
-        if (!value || value < state.pvh.minWidth) value = state.pvh.minWidth;
         widthRangeInput['rangeslider-js'].update({value: value});
         handlerWidthRangeInput(value)
     }
 
     function handlerHeightInputNumber(value) {
         if (value > state.pvh.maxHeight) value = state.pvh.maxHeight;
-        if (!value || value < state.pvh.minHeight) value = state.pvh.minHeight;
         heightRangeInput['rangeslider-js'].update({value: value});
         handlerHeightRangeInput(value)
     }
@@ -183,21 +225,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculatePodlozhka() {
-        let totalCost = 0
-        checkboxPvh.checked ? totalCost += findPrice('pvh') : null;
-        checkboxFigure.checked ? totalCost += findPrice('figure') : null;
-        checkboxCarcass.checked ? totalCost += findPrice('carcass') : null;
-        checkboxFilm.checked ? totalCost += findPrice('film') : null;
-        state.totalCost = totalCost;
+        state.totalCost = findPrice(state.currentPriceList);
         printCost();
         fillCallbackForm();
     }
 
     function fillCallbackForm() {
-        if (callbackInputType) callbackInputType.value = checkboxPvh.checked ? 'ПВХ и акрил' : 'Фигурный';
+        if (callbackInputType) callbackInputType.value = checkboxFlat.checked ? 'ПВХ и акрил' : 'Фигурный';
         if (callbackInputWidth) callbackInputWidth.value = widthRangeInput.value;
         if (callbackInputHeight) callbackInputHeight.value = heightRangeInput.value;
-        if (callbackInputFrame) callbackInputFrame.value = checkboxCarcass.checked ? 'Да' : 'Нет';
+        if (callbackInputFrame) callbackInputFrame.value = checkboxFrame.checked ? 'Да' : 'Нет';
         if (callbackInputFilm) callbackInputFilm.value = checkboxFilm.checked ? 'Да' : 'Нет';
         if (callbackInputSum) callbackInputSum.value = state.totalCost;
     }
@@ -227,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         podlozhkaCalculator.classList.toggle('active');
         if (!widthRangeInput.closest('div').querySelector('.rangeslider')) initPodlozhkaCalc();
         if (buttonPodlozhka.checked) {
-            lettersCalcSumObserver.observe(lettersCalculatorCost, { characterData: true, subtree: true, childList: true })
+            lettersCalcSumObserver.observe(lettersCalculatorCost, {characterData: true, subtree: true, childList: true})
         } else {
             lettersCalcSumObserver.disconnect();
             podlozhkaCalculator.classList.remove('active');
@@ -242,10 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ].forEach(input => input.value = '')
         }
     })
-    widthNumberInput.addEventListener('input', e => handlerWidthInputNumber(e.target.value))
-    heightNumberInput.addEventListener('input', e => handlerHeightInputNumber(e.target.value))
-    checkboxPvh.addEventListener('change', e => handlerCheckbox(e.target, 'pvh'))
-    checkboxFigure.addEventListener('change', e => handlerCheckbox(e.target, 'figure'))
-    checkboxCarcass.addEventListener('change', e => handlerCheckbox(e.target, 'carcass'))
-    checkboxFilm.addEventListener('change', e => handlerCheckbox(e.target, 'film'))
+    widthNumberInput.addEventListener('input', e => handlerWidthInputNumber(e.target.value));
+    heightNumberInput.addEventListener('input', e => handlerHeightInputNumber(e.target.value));
+    [checkboxFlat, checkboxFrame, checkboxCassette, checkboxFilm]
+        .forEach(checkbox => checkbox.addEventListener('change', () => handlerCheckbox()))
 })

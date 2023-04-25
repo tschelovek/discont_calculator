@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
+    <script src="./js/libs/rangeslider-js.min.js"></script>
   </head>
   <body>
     <div id="app"></div>
@@ -32,13 +33,33 @@
       <div class="podlozhka__wrapper">
 
         <div class="calc__radio">
-          <input type="radio" class="calc_radio" name="podlozhka__type" id="podlozhka_radio_0" value="./images/prices/koroba-new/kleennye_pvh_i_akril_skidka15.xls">
+          <input
+                  type="radio"
+                  class="calc_radio"
+                  name="podlozhka__type"
+                  id="podlozhka_radio_0"
+                  value="./images/prices/koroba-new/kleennye_pvh_i_akril_skidka15.xls"
+                  data-flat="http://localhost:3069/flat"
+                  data-flat_frame="http://localhost:3069/flat_frame"
+                  data-flat_film="http://localhost:3069/flat_film"
+                  data-flat_frame_film="http://localhost:3069/flat_frame_film"
+                  data-cassette="http://localhost:3069/cassette"
+                  data-cassette_frame="http://localhost:3069/cassette_frame"
+                  data-cassette_film="http://localhost:3069/cassette_film"
+                  data-cassette_frame_film="http://localhost:3069/cassette_frame_film"
+          >
           <label class="calc__label_0" data-title="Короб из ПВХ и акрила" data-desc="Световые короба из ПВХ и акрила используются как на улице, так и в интерьере. Основными материалами для изготовления корпуса являются листовой пластик (ПВХ) и акриловое оргстекло. Световая поверхность оклеивается светопропускающей пленкой в нужный цвет, а для подсветки используются светодиодныемодули." for="podlozhka_radio_0">
-            ПВХ и акрил                                <a href="#">Узнать подробнее</a>
+            ПВХ и акрил
           </label>
-          <input type="radio" class="calc_radio" name="podlozhka__type" id="podlozhka_radio_1" value="./images/prices/koroba-new/slozhnoi_formy_skidka15.xls">
+          <input
+                  type="radio"
+                  class="calc_radio"
+                  name="podlozhka__type"
+                  id="podlozhka_radio_1"
+                  value="./images/prices/koroba-new/slozhnoi_formy_skidka15.xls"
+          >
           <label class="calc__label_1" data-title="Фигурный короб" data-desc="Эту технологию часто используют для изготовления светового логотипа компании или написания текста с яркой контрастной обводкой. Основными материалами корпуса являются листовой пластик (ПВХ) и акрил. Четкие грани короба, отсутствие окантовочных профилей и возможность варьировать глубину от 7 до 20 см создают презентабельный вид этой конструкции" for="podlozhka_radio_1">
-            Фигурный                                <a href="#">Узнать подробнее</a>
+            Фигурный
           </label>
         </div>
       </div>
