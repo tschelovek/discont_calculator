@@ -2,7 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
 module.exports = (env) => ({
-    entry: './vanilla/main.js',
+    entry: './js/calculator.js',
     output: {
         filename: 'script_dev.js',
         path: path.resolve(__dirname, 'dist'),

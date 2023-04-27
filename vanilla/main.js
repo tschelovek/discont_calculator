@@ -1,4 +1,4 @@
-// import rangesliderJs from 'rangeslider-js';
+import rangesliderJs from 'rangeslider-js';
 
 document.addEventListener('DOMContentLoaded', () => {
     let state = {
@@ -58,10 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
             minHeight: 0,
             maxHeight: 10,
         },
+        designSum: 0,
         totalCost: 0,
         currentPriceList: '',
     }
 
+    const designRangeInput = document.getElementById('letters_design');
+    const designHint = designRangeInput.closest('div').querySelector('.letters__calc__hint')
     const buttonPodlozhka = document.getElementById('podlozhka_active');
     const lettersCalculatorCost = document.getElementById('print__let__sum');
     const podlozhkaCalculator = document.getElementById('podlozhka_more');
@@ -84,6 +87,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const widthTooltip = document.createElement('div');
     const heightTooltip = document.createElement('div');
     const lettersCalcSumObserver = new MutationObserver(calculatePodlozhka);
+    const lettersCalcSumObserver2 = new MutationObserver(updateLettersCost);
+    const observerConfig = { attributes: true, childList: true, subtree: true };
+
+    /**
+     * Слайдер "Дизайн"
+     */
+    const designPrice = designRangeInput.dataset.design_price;
+    // document.getElementById('test').addEventListener('click', () => lettersCalculatorCost.textContent = '100')
+
+    lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig);
+
+    rangesliderJs.create(designRangeInput, {
+        min: 0,
+        max: 22,
+        value: 0,
+        step: 1,
+        onSlide: (value) => handlerDesignRangeInput(value)
+    });
+
+    function handlerDesignRangeInput(value) {
+        lettersCalcSumObserver2.disconnect();
+
+        const lettersCost = parseInt(lettersCalculatorCost.textContent.replace(/\s+/g, ''));
+        const designCurrentSum = designPrice * value;
+        const subtraction = designCurrentSum - state.designSum;
+
+        lettersCalculatorCost.textContent = (lettersCost + subtraction).toLocaleString();
+        state.designSum = designCurrentSum;
+
+        if (value === 0) {
+            designHint.textContent = 'Работа дизайнера не требуется'
+        } else {
+            designHint.textContent = `${designCurrentSum} рублей, ${value * 15} минут работы дизайнера`;
+        }
+
+        lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig)
+    }
+
+    function updateLettersCost() {
+        lettersCalcSumObserver2.disconnect();
+        lettersCalculatorCost.textContent =
+            (parseInt(lettersCalculatorCost.textContent.replace(/\s+/g, '')) + state.designSum).toLocaleString();
+        lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig);
+    }
+
+    /**
+     * Конец слайдера "Дизайн"
+     */
 
     function parseResponseString(string) {
         let parsed = [];
@@ -98,28 +149,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return parsed.reverse()
     }
 
-    // function getPriceString(path) {
-    //     return fetch(`/udata/custom/readCalc/(${path}).json`, {
-    //         method: "GET",
-    //         credentials: "same-origin",
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //         },
-    //     })
-    //         .then(res => res.json())
-    //         .then(res => res.result)
-    //         .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
-    // }
     function getPriceString(path) {
-        return fetch(path, {
+        return fetch(`/udata/custom/readCalc/(${path}).json`, {
             method: "GET",
+            credentials: "same-origin",
             headers: {
                 "Content-Type": "application/json",
             },
         })
             .then(res => res.json())
+            .then(res => {
+                console.log(res)
+                return res.result
+            })
             .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
     }
+
+    // function getPriceString(path) {
+    //     return fetch(path, {
+    //         method: "GET",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //         },
+    //     })
+    //         .then(res => res.json())
+    //         .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
+    // }
 
     function initPodlozhkaCalc() {
         getPriceString(checkboxFlat.dataset.flat)
@@ -182,13 +237,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handlerWidthInputNumber(value) {
-        if (value > state.pvh.maxWidth) value = state.pvh.maxWidth;
+        if (value > state.flat.maxWidth) value = state.flat.maxWidth;
         widthRangeInput['rangeslider-js'].update({value: value});
         handlerWidthRangeInput(value)
     }
 
     function handlerHeightInputNumber(value) {
-        if (value > state.pvh.maxHeight) value = state.pvh.maxHeight;
+        if (value > state.flat.maxHeight) value = state.flat.maxHeight;
         heightRangeInput['rangeslider-js'].update({value: value});
         handlerHeightRangeInput(value)
     }
@@ -264,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
         podlozhkaCalculator.classList.toggle('active');
         if (!widthRangeInput.closest('div').querySelector('.rangeslider')) initPodlozhkaCalc();
         if (buttonPodlozhka.checked) {
-            lettersCalcSumObserver.observe(lettersCalculatorCost, {characterData: true, subtree: true, childList: true})
+            lettersCalcSumObserver.observe(lettersCalculatorCost, observerConfig)
         } else {
             lettersCalcSumObserver.disconnect();
             podlozhkaCalculator.classList.remove('active');
@@ -282,5 +337,5 @@ document.addEventListener('DOMContentLoaded', () => {
     widthNumberInput.addEventListener('input', e => handlerWidthInputNumber(e.target.value));
     heightNumberInput.addEventListener('input', e => handlerHeightInputNumber(e.target.value));
     [checkboxFlat, checkboxFrame, checkboxCassette, checkboxFilm]
-        .forEach(checkbox => checkbox.addEventListener('change', () => handlerCheckbox()))
+        .forEach(checkbox => checkbox.addEventListener('change', () => handlerCheckbox()));
 })

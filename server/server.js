@@ -7,7 +7,6 @@ const DB_FILE = process.env.DB_FILE || './db.json';
 const PORT = process.env.PORT || 3069;
 // префикс URI для всех методов приложения
 const URI_PREFIX = '';
-// const URI_PREFIX = 'http://localhost:3069';
 
 /**
  * Класс ошибки, используется для отправки ответа с определённым кодом и описанием ошибки
@@ -38,40 +37,6 @@ if (!existsSync(DB_FILE)) {
                     cassette_frame_film: modifyPriceListString(dataString, 40000),
                 },
             ]),
-            // JSON.stringify([
-            //     {
-            //         priceName: 'flat',
-            //         price: dataString,
-            //     },
-            //     {
-            //         priceName: 'flat_frame',
-            //         price: modifyPriceListString(dataString, 1000),
-            //     },
-            //     {
-            //         priceName: 'flat_film',
-            //         price: modifyPriceListString(dataString, 3000),
-            //     },
-            //     {
-            //         priceName: 'flat_frame_film',
-            //         price: modifyPriceListString(dataString, 5000),
-            //     },
-            //     {
-            //         priceName: 'cassette',
-            //         price: modifyPriceListString(dataString, 10000),
-            //     },
-            //     {
-            //         priceName: 'cassette_frame',
-            //         price: modifyPriceListString(dataString, 20000),
-            //     },
-            //     {
-            //         priceName: 'cassette_film',
-            //         price: modifyPriceListString(dataString, 30000),
-            //     },
-            //     {
-            //         priceName: 'cassette_frame_film',
-            //         price: modifyPriceListString(dataString, 40000),
-            //     },
-            // ]),
             {encoding: 'utf8'})
     })
 }
@@ -86,9 +51,7 @@ function modifyPriceListString(string, modifier) {
 
 function getPrices(params) {
     const prices = JSON.parse(readFileSync(DB_FILE) || '[]');
-    if (params) {
-        return prices[0][params]
-    }
+    if (params) { return prices[0][params] }
     return prices
 }
 
@@ -108,7 +71,7 @@ module.exports = createServer(async (req, res) => {
     if (req.method === 'OPTIONS') {
         // end = закончить формировать ответ и отправить его клиенту
         res.end();
-        return;
+        return
     }
     // console.log(`req.url: ${req.url}`)
 
