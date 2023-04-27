@@ -64,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const designRangeInput = document.getElementById('letters_design');
-    const designHint = designRangeInput.closest('div').querySelector('.letters__calc__hint')
     const buttonPodlozhka = document.getElementById('podlozhka_active');
     const lettersCalculatorCost = document.getElementById('print__let__sum');
     const podlozhkaCalculator = document.getElementById('podlozhka_more');
@@ -91,11 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const lettersCalcSumObserver2 = new MutationObserver(updateLettersCost);
     const observerConfig = { attributes: true, childList: true, subtree: true };
 
+    // document.getElementById('test').addEventListener('click', () => lettersCalculatorCost.textContent = '100')
+
     /**
      * Слайдер "Дизайн"
      */
     const designPrice = designRangeInput.dataset.design_price;
-    // document.getElementById('test').addEventListener('click', () => lettersCalculatorCost.textContent = '100')
+    const designHint = designRangeInput.closest('div').querySelector('.letters__calc__hint');
 
     lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig);
 
@@ -136,6 +137,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Конец слайдера "Дизайн"
+     */
+
+    /**
+     * Обработчик кнопок +/- у числовых инпутов в указанной обёртке
+     * @param wrappersArr - HTMLCollection элементов-обёрток (в д/случае .counter__wrapper)
+     */
+
+    addInputNumberControls(document.querySelectorAll('.podlozhka__more .counter__wrapper'))
+
+    function addInputNumberControls(wrappersArr) {
+        const event = new InputEvent("input", {
+            view: window,
+            bubbles: true,
+            cancelable: true,
+        });
+
+        wrappersArr.forEach(wrapper => {
+            const input = wrapper?.querySelector("input[type='number']");
+
+            wrapper?.querySelector('.counter__decrement').addEventListener('click', () => {
+                if (input.value > 0) input.stepDown(1);
+                input.dispatchEvent(event);
+            })
+            wrapper?.querySelector('.counter__increment').addEventListener('click', () => {
+                input.stepUp(1);
+                input.dispatchEvent(event);
+            })
+        })
+    }
+    /**
+     * Конец обработчика кнопок +/-
      */
 
     function parseResponseString(string) {

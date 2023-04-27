@@ -154,5 +154,25 @@ input[type=range]:focus::-ms-fill-upper {
 .podlozhka__more.active {
   display: block;
 }
+.podlozhka__more input[type=number] {
+  position: relative;
+  padding: 5px 25px 5px 5px;
+}
+.podlozhka__more input[type=number]::-webkit-inner-spin-button, .podlozhka__more input[type=number]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+.podlozhka__more input[type=number]::-webkit-outer-spin-button, .podlozhka__more input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: inner-spin-button !important;
+  width: 25px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+}
+.podlozhka__ranges__title-block {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 
 /*# sourceMappingURL=style.css.map */

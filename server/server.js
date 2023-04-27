@@ -62,15 +62,6 @@ module.exports = createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // запрос с методом OPTIONS может отправлять браузер автоматически для проверки CORS заголовков
-    // в этом случае достаточно ответить с пустым телом и этими заголовками
-    if (req.method === 'OPTIONS') {
-        // end = закончить формировать ответ и отправить его клиенту
-        res.end();
-        return
-    }
-    // console.log(`req.url: ${req.url}`)
-
     // если URI не начинается с нужного префикса - можем сразу отдать 404
     // if (!req.url || !req.url.startsWith(URI_PREFIX)) {
     //     res.statusCode = 404;
@@ -79,7 +70,6 @@ module.exports = createServer(async (req, res) => {
     // }
 
     const [uri, query] = req.url.substring(URI_PREFIX.length).split('?');
-    console.log(`uri: ${uri}`)
     const queryParams = {};
 
     if (query) {

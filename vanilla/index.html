@@ -16,7 +16,10 @@
 
     <div class="letters__calc__design">
       <h3>Дизайн</h3>
-      <input type="range" id="letters_design" data-design_price="90">
+      <div class="number-wrapper">
+        <input type="range" id="letters_design" data-design_price="90">
+
+      </div>
       <div class="letters__calc__hint">Работа дизайнера не требуется</div>
     </div>
 
@@ -71,14 +74,26 @@
       </div>
 
       <div>
-        <h3>Ширина</h3><br>
+        <div class="podlozhka__ranges__title-block">
+          <h3>Ширина<span>, см</span></h3>
+          <div class="counter__wrapper">
+            <button type="button" class="counter__decrement">-</button>
+            <input class="rangeslider__input" id="podlozhka_width_input" type="number" value="20">
+            <button type="button" class="counter__increment">+</button>
+          </div>
+        </div>
         <input type="range" id="podlozhka_width_range">
-        <input class="rangeslider__input" id="podlozhka_width_input" type="number" value="20">
       </div>
       <div>
-        <h3>Высота</h3><br>
+        <div class="podlozhka__ranges__title-block">
+          <h3>Высота<span>, см</span></h3>
+          <div class="counter__wrapper">
+            <button type="button" class="counter__decrement">-</button>
+            <input class="rangeslider__input" id="podlozhka_height_input" type="number" value="20">
+            <button type="button" class="counter__increment">+</button>
+          </div>
+        </div>
         <input type="range" id="podlozhka_height_range">
-        <input class="rangeslider__input" id="podlozhka_height_input" type="number" value="20">
       </div>
 
       <div>
