@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkboxFilm = document.getElementById('podlozhka_film');
     const costPodlozhkaOutput = document.getElementById('podlozhka_cost');
     const costOverallOutput = document.getElementById('leters_podlozhka_cost');
+    const callbackInputDesign = document.getElementById('letter_form_id_design_price');
     const callbackInputType = document.getElementById('letter_form_id_podlozhka_type');
     const callbackInputWidth = document.getElementById('letter_form_id_podlozhka_width');
     const callbackInputHeight = document.getElementById('letter_form_id_podlozhka_height');
@@ -115,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         lettersCalculatorCost.textContent = (lettersCost + subtraction).toLocaleString();
         state.designSum = designCurrentSum;
+        if (callbackInputDesign) callbackInputDesign.value = designCurrentSum;
 
         if (value === 0) {
             designHint.textContent = 'Работа дизайнера не требуется'
@@ -149,32 +151,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return parsed.reverse()
     }
 
-    function getPriceString(path) {
-        return fetch(`/udata/custom/readCalc/(${path}).json`, {
-            method: "GET",
-            credentials: "same-origin",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then(res => res.json())
-            .then(res => {
-                console.log(res)
-                return res.result
-            })
-            .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
-    }
-
     // function getPriceString(path) {
-    //     return fetch(path, {
+    //     return fetch(`/udata/custom/readCalc/(${path}).json`, {
     //         method: "GET",
+    //         credentials: "same-origin",
     //         headers: {
     //             "Content-Type": "application/json",
     //         },
     //     })
     //         .then(res => res.json())
+    //         .then(res => {
+    //             console.log(res)
+    //             return res.result
+    //         })
     //         .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
     // }
+
+    function getPriceString(path) {
+        return fetch(path, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res => res.json())
+            .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
+    }
 
     function initPodlozhkaCalc() {
         getPriceString(checkboxFlat.dataset.flat)

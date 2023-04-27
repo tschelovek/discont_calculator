@@ -56,12 +56,8 @@ function getPrices(params) {
 }
 
 module.exports = createServer(async (req, res) => {
-    // req - объект с информацией о запросе, res - объект для управления отправляемым ответом
 
-    // этот заголовок ответа указывает, что тело ответа будет в JSON формате
     res.setHeader('Content-Type', 'application/json');
-
-    // CORS заголовки ответа для поддержки кросс-доменных запросов из браузера
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -82,13 +78,10 @@ module.exports = createServer(async (req, res) => {
     //     return;
     // }
 
-    // убираем из запроса префикс URI, разбиваем его на путь и параметры
     const [uri, query] = req.url.substring(URI_PREFIX.length).split('?');
     console.log(`uri: ${uri}`)
     const queryParams = {};
 
-    // параметры могут отсутствовать вообще или иметь вид a=b&b=c
-    // во втором случае наполняем объект queryParams { a: 'b', b: 'c' }
     if (query) {
         for (const piece of query.split('&')) {
             const [key, value] = piece.split('=');
@@ -97,7 +90,6 @@ module.exports = createServer(async (req, res) => {
     }
 
     try {
-        // обрабатываем запрос и формируем тело ответа
         const body = await (async () => {
             if (uri === '' || uri === '/') {
                 if (req.method === 'GET') return getPrices();
@@ -109,24 +101,19 @@ module.exports = createServer(async (req, res) => {
         })();
         res.end(JSON.stringify(body));
     } catch (err) {
-        // обрабатываем сгенерированную нами же ошибку
         if (err instanceof ApiError) {
             res.writeHead(err.statusCode);
             res.end(JSON.stringify(err.data));
         } else {
-            // если что-то пошло не так - пишем об этом в консоль и возвращаем 500 ошибку сервера
             res.statusCode = 500;
             res.end(JSON.stringify({message: 'Server Error'}));
             console.error(err);
         }
     }
 })
-    // выводим инструкцию, как только сервер запустился...
     .on('listening', () => {
         if (process.env.NODE_ENV !== 'test') {
-            console.log(`Сервер CRM запущен. Вы можете использовать его по адресу http://localhost:${PORT}`);
             console.log('Нажмите CTRL+C, чтобы остановить сервер');
         }
     })
-    // ...и вызываем запуск сервера на указанном порту
     .listen(PORT);
