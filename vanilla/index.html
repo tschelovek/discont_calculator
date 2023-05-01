@@ -16,16 +16,53 @@
 
     <div class="letters__calc__design">
       <h3>Дизайн</h3>
-      <div class="number-wrapper">
-        <input type="range" id="letters_design" data-design_price="90">
+<!--      <div class="number-wrapper">-->
+        <input type="range" id="letters_design" data-design_price="90"
+               data-design_interval="15"
+               data-design_amount_intervals="66"
+        >
+      <div class="counter__wrapper">
+        <button type="button" class="counter__decrement">-</button>
+        <input class="letters_design__input" id="letters_design_input" type="number">
+        <button type="button" class="counter__increment">+</button>
+      </div>
+
+      <div class="letters__calc__hint">Работа дизайнера не требуется</div>
+
+      <div class="print__calc__sum print__let__sum">
+        <div>
+          <h2>Стоимость изготовления:</h2>
+          <div>
+            <span id="print__let__sum" data-sum="sum">630</span>₽
+          </div>
+        </div>
+
+        <div>
+          <h2>Стоимость монтажа:</h2>
+          <div>
+            <span id="print__let__montage" data-sum="sum">0</span>₽
+          </div>
+        </div>
+
+        <div>
+          <h2>Стоимость дизайна:</h2>
+          <div>
+            <span id="print__let__design" data-sum="sum">0</span>₽
+          </div>
+        </div>
+
+        <div>
+          <h2>ИТОГО:</h2>
+          <div>
+            <span id="print__let__total" data-sum="sum">0</span>₽
+          </div>
+        </div>
 
       </div>
-      <div class="letters__calc__hint">Работа дизайнера не требуется</div>
+
+      <!--      </div>-->
     </div>
 
-    <div>
-      <span id="print__let__sum" data-sum="sum">7&nbsp;800</span>₽
-    </div>
 
     <div>
       <input type="checkbox" name="podlozhka_active" id="podlozhka_active">

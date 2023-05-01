@@ -58,12 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
             minHeight: 0,
             maxHeight: 10,
         },
-        designSum: 0,
+        // designSum: 0,
         totalCost: 0,
         currentPriceList: '',
     }
 
-    const designRangeInput = document.getElementById('letters_design');
     const buttonPodlozhka = document.getElementById('podlozhka_active');
     const lettersCalculatorCost = document.getElementById('print__let__sum');
     const podlozhkaCalculator = document.getElementById('podlozhka_more');
@@ -87,88 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const widthTooltip = document.createElement('div');
     const heightTooltip = document.createElement('div');
     const lettersCalcSumObserver = new MutationObserver(calculatePodlozhka);
-    const lettersCalcSumObserver2 = new MutationObserver(updateLettersCost);
-    const observerConfig = { attributes: true, childList: true, subtree: true };
+    // const lettersCalcSumObserver2 = new MutationObserver(updateLettersCost);
+    const observerConfig = {attributes: true, childList: true, subtree: true};
 
-    // document.getElementById('test').addEventListener('click', () => lettersCalculatorCost.textContent = '100')
+    document.getElementById('test').addEventListener('click', () => lettersCalculatorCost.textContent = '100');
 
-    /**
-     * Слайдер "Дизайн"
-     */
-    const designPrice = designRangeInput.dataset.design_price;
-    const designHint = designRangeInput.closest('div').querySelector('.letters__calc__hint');
+    lettersCalcSumObserver.observe(lettersCalculatorCost, observerConfig)
 
-    lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig);
-
-    rangesliderJs.create(designRangeInput, {
-        min: 0,
-        max: 22,
-        value: 0,
-        step: 1,
-        onSlide: (value) => handlerDesignRangeInput(value)
-    });
-
-    function handlerDesignRangeInput(value) {
-        lettersCalcSumObserver2.disconnect();
-
-        const lettersCost = parseInt(lettersCalculatorCost.textContent.replace(/\s+/g, ''));
-        const designCurrentSum = designPrice * value;
-        const subtraction = designCurrentSum - state.designSum;
-
-        lettersCalculatorCost.textContent = (lettersCost + subtraction).toLocaleString();
-        state.designSum = designCurrentSum;
-        if (callbackInputDesign) callbackInputDesign.value = designCurrentSum;
-
-        if (value === 0) {
-            designHint.textContent = 'Работа дизайнера не требуется'
-        } else {
-            designHint.textContent = `${designCurrentSum} рублей, ${value * 15} минут работы дизайнера`;
-        }
-
-        lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig)
+    function getCleanNumber(string = '') {
+        return Number(string.replace(/\s+/g, ''))
     }
-
-    function updateLettersCost() {
-        lettersCalcSumObserver2.disconnect();
-        lettersCalculatorCost.textContent =
-            (parseInt(lettersCalculatorCost.textContent.replace(/\s+/g, '')) + state.designSum).toLocaleString();
-        lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig);
-    }
-
-    /**
-     * Конец слайдера "Дизайн"
-     */
-
-    /**
-     * Обработчик кнопок +/- у числовых инпутов в указанной обёртке
-     * @param wrappersArr - HTMLCollection элементов-обёрток (в д/случае .counter__wrapper)
-     */
-
-    addInputNumberControls(document.querySelectorAll('.podlozhka__more .counter__wrapper'))
-
-    function addInputNumberControls(wrappersArr) {
-        const event = new InputEvent("input", {
-            view: window,
-            bubbles: true,
-            cancelable: true,
-        });
-
-        wrappersArr.forEach(wrapper => {
-            const input = wrapper?.querySelector("input[type='number']");
-
-            wrapper?.querySelector('.counter__decrement').addEventListener('click', () => {
-                if (input.value > 0) input.stepDown(1);
-                input.dispatchEvent(event);
-            })
-            wrapper?.querySelector('.counter__increment').addEventListener('click', () => {
-                input.stepUp(1);
-                input.dispatchEvent(event);
-            })
-        })
-    }
-    /**
-     * Конец обработчика кнопок +/-
-     */
 
     function parseResponseString(string) {
         let parsed = [];
@@ -192,10 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //         },
     //     })
     //         .then(res => res.json())
-    //         .then(res => {
-    //             console.log(res)
-    //             return res.result
-    //         })
+    //         .then(res => res.result)
     //         .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
     // }
 
@@ -304,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // state = {
         //     ...state,
         //     [key]: {
-        //         price: data,
+        //         pr ice: data,
         //         minWidth: minWidth,
         //         maxWidth: maxWidth,
         //         minHeight: minHeight,
@@ -345,17 +269,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function printCost() {
         const lettersCost = lettersCalculatorCost.textContent;
-        costOverallOutput.textContent = (parseInt(lettersCost.replace(/\s+/g, '')) + parseInt(state.totalCost)).toString();
+        costOverallOutput.textContent =
+            (parseInt(lettersCost.replace(/\s+/g, '')) + parseInt(state.totalCost)).toString();
         costPodlozhkaOutput.textContent = state.totalCost;
     }
 
     buttonPodlozhka.addEventListener('click', () => {
         podlozhkaCalculator.classList.toggle('active');
         if (!widthRangeInput.closest('div').querySelector('.rangeslider')) initPodlozhkaCalc();
-        if (buttonPodlozhka.checked) {
-            lettersCalcSumObserver.observe(lettersCalculatorCost, observerConfig)
-        } else {
-            lettersCalcSumObserver.disconnect();
+        if (!buttonPodlozhka.checked) {
+            // lettersCalcSumObserver.observe(lettersCalculatorCost, observerConfig)
+        // } else {
+        //     lettersCalcSumObserver.disconnect();
             podlozhkaCalculator.classList.remove('active');
 
             [
@@ -372,4 +297,113 @@ document.addEventListener('DOMContentLoaded', () => {
     heightNumberInput.addEventListener('input', e => handlerHeightInputNumber(e.target.value));
     [checkboxFlat, checkboxFrame, checkboxCassette, checkboxFilm]
         .forEach(checkbox => checkbox.addEventListener('change', () => handlerCheckbox()));
+
+
+    /**
+     * Слайдер "Дизайн"
+     *
+     */
+
+    const designRangeInput = document.getElementById('letters_design');
+    const designPrice = parseInt(designRangeInput.dataset.design_price);
+    const designMinutesInterval = parseInt(designRangeInput.dataset.design_interval);
+    const designMaxIntervals = parseInt(designRangeInput.dataset.design_amount_intervals);
+    const designHint = designRangeInput.closest('div').querySelector('.letters__calc__hint');
+    const inputDesignSlider = document.getElementById('letters_design_input');
+    const designCostOutput = document.getElementById('print__let__design');
+
+    // lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig);
+    inputDesignSlider.addEventListener('input', e => {
+        const value = e.currentTarget.value;
+        if (value > designMaxIntervals) return;
+
+        designRangeInput['rangeslider-js'].update({value: value});
+        handlerDesignRangeInput(value)
+    });
+    rangesliderJs.create(designRangeInput, {
+        min: 0,
+        max: designMaxIntervals,
+        value: 0,
+        step: 1,
+        onSlide: (value) => handlerDesignRangeInput(value)
+    });
+    addInputNumberControls(document.querySelectorAll('.letters__calc__design .counter__wrapper'));
+
+    function handlerDesignRangeInput(value) {
+        // const lettersCost = getCleanNumber(lettersCalculatorCost.textContent);
+        const designCurrentSum = designPrice * value;
+        // const subtraction = designCurrentSum - state.designSum;
+
+        inputDesignSlider.value = value;
+        designCostOutput.textContent = designCurrentSum.toLocaleString();
+        state.designSum = designCurrentSum;
+        if (callbackInputDesign) callbackInputDesign.value = designCurrentSum;
+
+        if (value === 0) {
+            designHint.textContent = 'Работа дизайнера не требуется'
+        } else {
+            const minutes = (value * designMinutesInterval) % 60;
+            const minutesText = minutes === 0 ? '' : `${minutes} минут `;
+
+            const hours = (value * designMinutesInterval) / 60;
+            let hoursText = '';
+            if (hours === 1) hoursText = '1 час ';
+            if (hours > 1) hoursText = `${Math.floor(hours)}ч `;
+
+            designHint.textContent = `${designCurrentSum} рублей, ${hoursText}${minutesText} работы дизайнера`;
+        }
+
+        updateLettersTotalCost()
+        // lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig)
+    }
+
+    function updateLettersCost() {
+        // lettersCalcSumObserver2.disconnect();
+        // lettersCalculatorCost.textContent =
+        //     (parseInt(lettersCalculatorCost.textContent.replace(/\s+/g, '')) + state.designSum).toLocaleString();
+        // lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig);
+    }
+
+    function updateLettersTotalCost() {
+
+    }
+
+    /**
+     * Конец слайдера "Дизайн"
+     */
+
+    /**
+     * Обработчик кнопок +/- у числовых инпутов в указанной обёртке
+     * @param wrappersArr - HTMLCollection элементов-обёрток (в д/случае .counter__wrapper)
+     */
+
+    addInputNumberControls(document.querySelectorAll('.podlozhka__more .counter__wrapper'))
+
+    function addInputNumberControls(wrappersArr) {
+        const event = new InputEvent("input", {
+            view: window,
+            bubbles: true,
+            cancelable: true,
+        });
+
+        wrappersArr.forEach(wrapper => {
+            const input = wrapper?.querySelector("input[type='number']");
+
+            wrapper?.querySelector('.counter__decrement').addEventListener('click', () => {
+                if (input.value > 0) input.stepDown(1);
+                input.dispatchEvent(event);
+            })
+            wrapper?.querySelector('.counter__increment').addEventListener('click', () => {
+                input.stepUp(1);
+                input.dispatchEvent(event);
+            })
+        })
+    }
+
+    /**
+     * Конец обработчика кнопок +/-
+     */
+
 })
+
+
