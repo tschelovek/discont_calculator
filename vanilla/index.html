@@ -2,12 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
 <!--    <link rel="stylesheet" href="../css/range.min.css">-->
     <link rel="stylesheet" href="./style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
-    <script src="./js/libs/rangeslider-js.min.js"></script>
   </head>
   <body>
     <div id="app"></div>
@@ -16,17 +14,17 @@
 
     <div class="letters__calc__design">
       <h3>Дизайн</h3>
-<!--      <div class="number-wrapper">-->
-        <input type="range" id="letters_design" data-design_price="90"
-               data-design_interval="15"
-               data-design_amount_intervals="66"
-        >
       <div class="counter__wrapper">
         <button type="button" class="counter__decrement">-</button>
         <input class="letters_design__input" id="letters_design_input" type="number">
         <button type="button" class="counter__increment">+</button>
       </div>
 
+      <!--      <div class="number-wrapper">-->
+        <input type="range" id="letters_design" data-design_price="90"
+               data-design_interval="15"
+               data-design_amount_intervals="66"
+        >
       <div class="letters__calc__hint">Работа дизайнера не требуется</div>
 
       <div class="print__calc__sum print__let__sum">
@@ -54,7 +52,7 @@
         <div>
           <h2>ИТОГО:</h2>
           <div>
-            <span id="print__let__total" data-sum="sum">0</span>₽
+            <span id="print__let__total" data-sum="sum">630</span>₽
           </div>
         </div>
 

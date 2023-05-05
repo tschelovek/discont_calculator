@@ -1,6 +1,13 @@
 import rangesliderJs from 'rangeslider-js';
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    /**
+     *
+     * Калькулятор "Подложка"
+     *
+     *
+     */
     let state = {
         flat: {
             price: undefined,
@@ -58,13 +65,14 @@ document.addEventListener('DOMContentLoaded', () => {
             minHeight: 0,
             maxHeight: 10,
         },
-        // designSum: 0,
-        totalCost: 0,
+        podlozhkaCost: 0,
         currentPriceList: '',
     }
 
     const buttonPodlozhka = document.getElementById('podlozhka_active');
     const lettersCalculatorCost = document.getElementById('print__let__sum');
+    const montageCalculatorCost = document.getElementById('print__let__montage');
+    const lettersCalculatorTotal = document.getElementById('print__let__total');
     const podlozhkaCalculator = document.getElementById('podlozhka_more');
     const widthRangeInput = document.getElementById('podlozhka_width_range');
     const widthNumberInput = document.getElementById('podlozhka_width_input');
@@ -77,21 +85,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const costPodlozhkaOutput = document.getElementById('podlozhka_cost');
     const costOverallOutput = document.getElementById('leters_podlozhka_cost');
     const callbackInputDesign = document.getElementById('letter_form_id_design_price');
+    const callbackDesignDuration = document.getElementById('letter_form_id_design_duration');
     const callbackInputType = document.getElementById('letter_form_id_podlozhka_type');
     const callbackInputWidth = document.getElementById('letter_form_id_podlozhka_width');
     const callbackInputHeight = document.getElementById('letter_form_id_podlozhka_height');
     const callbackInputFrame = document.getElementById('letter_form_id_podlozhka_opt_frame');
     const callbackInputFilm = document.getElementById('letter_form_id_podlozhka_opt_film');
     const callbackInputSum = document.getElementById('letter_form_id_podlozhka_sum');
+    const callbackInputTotal = document.getElementById('letter_form_id_podlozhka_total');
     const widthTooltip = document.createElement('div');
     const heightTooltip = document.createElement('div');
-    const lettersCalcSumObserver = new MutationObserver(calculatePodlozhka);
-    // const lettersCalcSumObserver2 = new MutationObserver(updateLettersCost);
+    const lettersSumObserver = new MutationObserver(updateLettersTotalCost);
+    const lettersMontageObserver = new MutationObserver(updateLettersTotalCost);
     const observerConfig = {attributes: true, childList: true, subtree: true};
 
-    document.getElementById('test').addEventListener('click', () => lettersCalculatorCost.textContent = '100');
-
-    lettersCalcSumObserver.observe(lettersCalculatorCost, observerConfig)
+    lettersSumObserver.observe(lettersCalculatorCost, observerConfig);
+    lettersMontageObserver.observe(montageCalculatorCost, observerConfig);
 
     function getCleanNumber(string = '') {
         return Number(string.replace(/\s+/g, ''))
@@ -110,27 +119,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return parsed.reverse()
     }
 
-    // function getPriceString(path) {
-    //     return fetch(`/udata/custom/readCalc/(${path}).json`, {
-    //         method: "GET",
-    //         credentials: "same-origin",
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //         },
-    //     })
-    //         .then(res => res.json())
-    //         .then(res => res.result)
-    //         .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
-    // }
-
     function getPriceString(path) {
+        if (import.meta.env.PROD) path = `/udata/custom/readCalc/(${path}).json`;
         return fetch(path, {
             method: "GET",
+            credentials: "same-origin",
             headers: {
                 "Content-Type": "application/json",
             },
         })
             .then(res => res.json())
+            .then(res => res.result)
             .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
     }
 
@@ -238,8 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculatePodlozhka() {
-        state.totalCost = findPrice(state.currentPriceList);
-        printCost();
+        state.podlozhkaCost = findPrice(state.currentPriceList);
+        printCostPodlozhka();
         fillCallbackForm();
     }
 
@@ -249,7 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (callbackInputHeight) callbackInputHeight.value = heightRangeInput.value;
         if (callbackInputFrame) callbackInputFrame.value = checkboxFrame.checked ? 'Да' : 'Нет';
         if (callbackInputFilm) callbackInputFilm.value = checkboxFilm.checked ? 'Да' : 'Нет';
-        if (callbackInputSum) callbackInputSum.value = state.totalCost;
+        if (callbackInputSum) callbackInputSum.value = state.podlozhkaCost;
+        if (callbackInputTotal) callbackInputTotal.value = `Общая стоимость, включая подложку: ${getCleanNumber(lettersCalculatorTotal.textContent) + parseInt(state.podlozhkaCost)}`
     }
 
     function findPrice(priceName = '') {
@@ -267,20 +267,19 @@ document.addEventListener('DOMContentLoaded', () => {
         heightTooltip.textContent = heightRangeInput.value;
     }
 
-    function printCost() {
-        const lettersCost = lettersCalculatorCost.textContent;
-        costOverallOutput.textContent =
-            (parseInt(lettersCost.replace(/\s+/g, '')) + parseInt(state.totalCost)).toString();
-        costPodlozhkaOutput.textContent = state.totalCost;
+    function printCostPodlozhka() {
+        const lettersCost = lettersCalculatorTotal.textContent;
+        costOverallOutput.textContent = (getCleanNumber(lettersCost) + parseInt(state.podlozhkaCost)).toString();
+        costPodlozhkaOutput.textContent = state.podlozhkaCost;
     }
 
     buttonPodlozhka.addEventListener('click', () => {
         podlozhkaCalculator.classList.toggle('active');
         if (!widthRangeInput.closest('div').querySelector('.rangeslider')) initPodlozhkaCalc();
+
+        printCostPodlozhka();
+
         if (!buttonPodlozhka.checked) {
-            // lettersCalcSumObserver.observe(lettersCalculatorCost, observerConfig)
-        // } else {
-        //     lettersCalcSumObserver.disconnect();
             podlozhkaCalculator.classList.remove('active');
 
             [
@@ -312,14 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputDesignSlider = document.getElementById('letters_design_input');
     const designCostOutput = document.getElementById('print__let__design');
 
-    // lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig);
-    inputDesignSlider.addEventListener('input', e => {
-        const value = e.currentTarget.value;
-        if (value > designMaxIntervals) return;
-
-        designRangeInput['rangeslider-js'].update({value: value});
-        handlerDesignRangeInput(value)
-    });
     rangesliderJs.create(designRangeInput, {
         min: 0,
         max: designMaxIntervals,
@@ -327,17 +318,25 @@ document.addEventListener('DOMContentLoaded', () => {
         step: 1,
         onSlide: (value) => handlerDesignRangeInput(value)
     });
+
+    inputDesignSlider.addEventListener('input', e => {
+        const value = e.currentTarget.value;
+        if (value > designMaxIntervals) return;
+
+        designRangeInput['rangeslider-js'].update({value: value});
+        handlerDesignRangeInput(value)
+    });
     addInputNumberControls(document.querySelectorAll('.letters__calc__design .counter__wrapper'));
 
     function handlerDesignRangeInput(value) {
-        // const lettersCost = getCleanNumber(lettersCalculatorCost.textContent);
         const designCurrentSum = designPrice * value;
-        // const subtraction = designCurrentSum - state.designSum;
 
-        inputDesignSlider.value = value;
+        if (typeof value !== 'number') value = Number(value);
+
+        if (inputDesignSlider.value !== value) inputDesignSlider.value = value;
         designCostOutput.textContent = designCurrentSum.toLocaleString();
-        state.designSum = designCurrentSum;
         if (callbackInputDesign) callbackInputDesign.value = designCurrentSum;
+        if (callbackDesignDuration) callbackDesignDuration.value = `${designMinutesInterval * value} минут`;
 
         if (value === 0) {
             designHint.textContent = 'Работа дизайнера не требуется'
@@ -354,18 +353,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateLettersTotalCost()
-        // lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig)
-    }
-
-    function updateLettersCost() {
-        // lettersCalcSumObserver2.disconnect();
-        // lettersCalculatorCost.textContent =
-        //     (parseInt(lettersCalculatorCost.textContent.replace(/\s+/g, '')) + state.designSum).toLocaleString();
-        // lettersCalcSumObserver2.observe(lettersCalculatorCost, observerConfig);
     }
 
     function updateLettersTotalCost() {
+        const callbackTotalInput = document.getElementById('letter_form_id_letters_total');
+        const lettersTotalCost = getCleanNumber(lettersCalculatorCost.textContent);
+        const montageCost = getCleanNumber(montageCalculatorCost.textContent);
+        const designCost = getCleanNumber(designCostOutput.textContent);
 
+        const totalCost = lettersTotalCost + montageCost + designCost;
+
+        lettersCalculatorTotal.textContent = totalCost.toLocaleString();
+        if (callbackTotalInput) callbackTotalInput.value = totalCost;
+        if (buttonPodlozhka.checked) printCostPodlozhka();
     }
 
     /**

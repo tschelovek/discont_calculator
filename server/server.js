@@ -62,13 +62,6 @@ module.exports = createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // если URI не начинается с нужного префикса - можем сразу отдать 404
-    // if (!req.url || !req.url.startsWith(URI_PREFIX)) {
-    //     res.statusCode = 404;
-    //     res.end(JSON.stringify({message: 'Not Found'}));
-    //     return;
-    // }
-
     const [uri, query] = req.url.substring(URI_PREFIX.length).split('?');
     const queryParams = {};
 
@@ -82,10 +75,10 @@ module.exports = createServer(async (req, res) => {
     try {
         const body = await (async () => {
             if (uri === '' || uri === '/') {
-                if (req.method === 'GET') return getPrices();
+                if (req.method === 'GET') return {result: getPrices()};
             } else {
                 const itemId = req.url.substring(1);
-                if (req.method === 'GET') return getPrices(itemId);
+                if (req.method === 'GET') return {result:getPrices(itemId)};
             }
             return null;
         })();
