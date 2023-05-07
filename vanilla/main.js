@@ -1,4 +1,5 @@
 import rangesliderJs from 'rangeslider-js';
+import {findMinMax, getCleanNumber} from "./js/utils.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -102,10 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
     lettersSumObserver.observe(lettersCalculatorCost, observerConfig);
     lettersMontageObserver.observe(montageCalculatorCost, observerConfig);
 
-    function getCleanNumber(string = '') {
-        return Number(string.replace(/\s+/g, ''))
-    }
-
     function parseResponseString(string) {
         let parsed = [];
         string.split('|').map(params => {
@@ -203,13 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (value > state.flat.maxHeight) value = state.flat.maxHeight;
         heightRangeInput['rangeslider-js'].update({value: value});
         handlerHeightRangeInput(value)
-    }
-
-    function findMinMax(arr, dimension) {
-        const arrValues = arr.map(el => {
-            return el[dimension]
-        })
-        return {min: Math.min(...arrValues), max: Math.max(...arrValues)}
     }
 
     function setUpPrice(data, key) {
