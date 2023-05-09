@@ -1,7 +1,8 @@
 # discont_calculator
 calculator
 
-Запуск: 
+Запуск: discont_calculator/vanilla/
+
 *serv:responce* — локальный сервер для ответов;
 *dev* — рабочая версия приложения;
 
