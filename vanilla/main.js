@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
      *
      * Калькулятор "Подложка"
      *
-     *
      */
     let state = {
         flat: {
@@ -217,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // state = {
         //     ...state,
         //     [key]: {
-        //         pr ice: data,
+        //         price: data,
         //         minWidth: minWidth,
         //         maxWidth: maxWidth,
         //         minHeight: minHeight,
@@ -232,15 +231,21 @@ document.addEventListener('DOMContentLoaded', () => {
         fillCallbackForm();
     }
 
+    // Для стабильности оборачиваем заполнение формы обратной связи в try/catch на случай изменения шаблона
     function fillCallbackForm() {
-        if (callbackInputType) callbackInputType.value = checkboxFlat.checked ? 'ПВХ и акрил' : 'Фигурный';
-        if (callbackInputWidth) callbackInputWidth.value = widthRangeInput.value;
-        if (callbackInputHeight) callbackInputHeight.value = heightRangeInput.value;
-        if (callbackInputFrame) callbackInputFrame.value = checkboxFrame.checked ? 'Да' : 'Нет';
-        if (callbackInputFilm) callbackInputFilm.value = checkboxFilm.checked ? 'Да' : 'Нет';
-        if (callbackInputSum) callbackInputSum.value = state.podlozhkaCost;
-        if (callbackInputTotal) callbackInputTotal.value = `Общая стоимость, включая подложку: ${getCleanNumber(lettersCalculatorTotal.textContent) + parseInt(state.podlozhkaCost)}`
+        try {
+            callbackInputType.value = checkboxFlat.checked ? 'ПВХ и акрил' : 'Фигурный'
+            callbackInputWidth.value = widthRangeInput.value;
+            callbackInputHeight.value = heightRangeInput.value;
+            callbackInputFrame.value = checkboxFrame.checked ? 'Да' : 'Нет';
+            callbackInputFilm.value = checkboxFilm.checked ? 'Да' : 'Нет';
+            callbackInputSum.value = state.podlozhkaCost;
+            callbackInputTotal.value = `Общая стоимость, включая подложку: ${getCleanNumber(lettersCalculatorTotal.textContent) + parseInt(state.podlozhkaCost)}`;
+        } catch {
+            console.error('Отсутствуют необходимые поля для заполнения формы обратной связи')
+        }
     }
+
 
     function findPrice(priceName = '') {
         return state[priceName]?.price?.find(({width, height}) => {
@@ -272,14 +277,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!buttonPodlozhka.checked) {
             podlozhkaCalculator.classList.remove('active');
 
-            [
-                callbackInputType,
-                callbackInputWidth,
-                callbackInputHeight,
-                callbackInputFrame,
-                callbackInputFilm,
-                callbackInputSum,
-            ].forEach(input => input.value = '')
+            try {
+                [
+                    callbackInputType,
+                    callbackInputWidth,
+                    callbackInputHeight,
+                    callbackInputFrame,
+                    callbackInputFilm,
+                    callbackInputSum,
+                ].forEach(input => input.value = '')
+            } catch {
+                console.error('Отсутствуют необходимые поля для заполнения формы обратной связи')
+            }
         }
     })
     widthNumberInput.addEventListener('input', e => handlerWidthInputNumber(e.target.value));
@@ -383,6 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (input.value > 0) input.stepDown(1);
                 input.dispatchEvent(event);
             })
+
             wrapper?.querySelector('.counter__increment').addEventListener('click', () => {
                 input.stepUp(1);
                 input.dispatchEvent(event);
