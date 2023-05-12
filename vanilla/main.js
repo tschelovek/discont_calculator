@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lettersCalculatorCost = document.getElementById('print__let__sum');
     const montageCalculatorCost = document.getElementById('print__let__montage');
     const lettersCalculatorTotal = document.getElementById('print__let__total');
-    const podlozhkaCalculator = document.getElementById('podlozhka_more');
+    const backgroundCalculator = document.getElementById('podlozhka_more');
     const widthRangeInput = document.getElementById('podlozhka_width_range');
     const widthNumberInput = document.getElementById('podlozhka_width_input');
     const heightRangeInput = document.getElementById('podlozhka_height_range');
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkboxCassette = document.getElementById('podlozhka_radio_1');
     const checkboxFrame = document.getElementById('podlozhka_carcass');
     const checkboxFilm = document.getElementById('podlozhka_film');
-    const costPodlozhkaOutput = document.getElementById('podlozhka_cost');
+    const costBackgroundOutput = document.getElementById('podlozhka_cost');
     const costOverallOutput = document.getElementById('leters_podlozhka_cost');
     const callbackInputDesign = document.getElementById('letter_form_id_design_price');
     const callbackDesignDuration = document.getElementById('letter_form_id_design_duration');
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
     }
 
-    function initPodlozhkaCalc() {
+    function initBackgroundCalc() {
         getPriceString(checkboxFlat.dataset.flat)
             .then(res => {
 
@@ -168,25 +168,25 @@ document.addEventListener('DOMContentLoaded', () => {
             getPriceString(checkboxFlat.dataset[priceName])
                 .then(res => {
                     setUpPrice(parseResponseString(res), priceName);
-                    calculatePodlozhka();
+                    calculateBackground();
                 })
                 .catch(err => console.error(err.message));
             return
         }
 
-        calculatePodlozhka();
+        calculateBackground();
     }
 
     function handlerWidthRangeInput(value) {
         widthNumberInput.value = value;
         widthTooltip.textContent = value;
-        calculatePodlozhka();
+        calculateBackground();
     }
 
     function handlerHeightRangeInput(value) {
         heightNumberInput.value = value;
         heightTooltip.textContent = value;
-        calculatePodlozhka();
+        calculateBackground();
     }
 
     function handlerWidthInputNumber(value) {
@@ -225,9 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // }
     }
 
-    function calculatePodlozhka() {
+    function calculateBackground() {
         state.podlozhkaCost = findPrice(state.currentPriceList);
-        printCostPodlozhka();
+        printCostBackground();
         fillCallbackForm();
     }
 
@@ -262,20 +262,20 @@ document.addEventListener('DOMContentLoaded', () => {
         heightTooltip.textContent = heightRangeInput.value;
     }
 
-    function printCostPodlozhka() {
+    function printCostBackground() {
         const lettersCost = lettersCalculatorTotal.textContent;
         costOverallOutput.textContent = (getCleanNumber(lettersCost) + parseInt(state.podlozhkaCost)).toString();
-        costPodlozhkaOutput.textContent = state.podlozhkaCost;
+        costBackgroundOutput.textContent = state.podlozhkaCost;
     }
 
     buttonPodlozhka.addEventListener('click', () => {
-        podlozhkaCalculator.classList.toggle('active');
-        if (!widthRangeInput.closest('div').querySelector('.rangeslider')) initPodlozhkaCalc();
+        backgroundCalculator.classList.toggle('active');
+        if (!widthRangeInput.closest('div').querySelector('.rangeslider')) initBackgroundCalc();
 
-        printCostPodlozhka();
+        printCostBackground();
 
         if (!buttonPodlozhka.checked) {
-            podlozhkaCalculator.classList.remove('active');
+            backgroundCalculator.classList.remove('active');
 
             try {
                 [
@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         lettersCalculatorTotal.textContent = totalCost.toLocaleString();
         if (callbackTotalInput) callbackTotalInput.value = totalCost;
-        if (buttonPodlozhka.checked) printCostPodlozhka();
+        if (buttonPodlozhka.checked) printCostBackground();
     }
 
     /**
