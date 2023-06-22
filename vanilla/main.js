@@ -1,382 +1,200 @@
-import rangesliderJs from 'rangeslider-js';
-import {findMinMax, getCleanNumber} from "./js/utils.js";
-
 document.addEventListener('DOMContentLoaded', () => {
+    const groupTrip = document.querySelector('.calc-mr__group_trip');
+    const groupFilm = document.querySelector('.calc-mr__group_film');
+    const groupBanner = document.querySelector('.calc-mr__group_banner');
+    const groupCorob = document.querySelector('.calc-mr__group_corob');
+    const groupLightLetters = document.querySelector('.calc-mr__group_light-letters');
+    const groupMore = document.querySelector('.calc-mr__group_more');
+    const groupSpectech = document.querySelector('.calc-mr__group_spectech');
 
-    /**
-     *
-     * Калькулятор "Подложка"
-     *
-     */
-    let state = {
-        flat: {
-            price: undefined,
-            minWidth: 0,
-            maxWidth: 10,
-            minHeight: 0,
-            maxHeight: 10,
-        },
-        flat_frame: {
-            price: undefined,
-            minWidth: 0,
-            maxWidth: 10,
-            minHeight: 0,
-            maxHeight: 10,
-        },
-        flat_film: {
-            price: undefined,
-            minWidth: 0,
-            maxWidth: 10,
-            minHeight: 0,
-            maxHeight: 10,
-        },
-        flat_frame_film: {
-            price: undefined,
-            minWidth: 0,
-            maxWidth: 10,
-            minHeight: 0,
-            maxHeight: 10,
-        },
-        cassette: {
-            price: undefined,
-            minWidth: 0,
-            maxWidth: 10,
-            minHeight: 0,
-            maxHeight: 10,
-        },
-        cassette_frame: {
-            price: undefined,
-            minWidth: 0,
-            maxWidth: 10,
-            minHeight: 0,
-            maxHeight: 10,
-        },
-        cassette_film: {
-            price: undefined,
-            minWidth: 0,
-            maxWidth: 10,
-            minHeight: 0,
-            maxHeight: 10,
-        },
-        cassette_frame_film: {
-            price: undefined,
-            minWidth: 0,
-            maxWidth: 10,
-            minHeight: 0,
-            maxHeight: 10,
-        },
-        podlozhkaCost: 0,
-        currentPriceList: '',
-    }
+    const groupsArr = [
 
-    const buttonPodlozhka = document.getElementById('podlozhka_active');
-    const lettersCalculatorCost = document.getElementById('print__let__sum');
-    const montageCalculatorCost = document.getElementById('print__let__montage');
-    const lettersCalculatorTotal = document.getElementById('print__let__total');
-    const backgroundCalculator = document.getElementById('podlozhka_more');
-    const widthRangeInput = document.getElementById('podlozhka_width_range');
-    const widthNumberInput = document.getElementById('podlozhka_width_input');
-    const heightRangeInput = document.getElementById('podlozhka_height_range');
-    const heightNumberInput = document.getElementById('podlozhka_height_input');
-    const checkboxFlat = document.getElementById('podlozhka_radio_0');
-    const checkboxCassette = document.getElementById('podlozhka_radio_1');
-    const checkboxFrame = document.getElementById('podlozhka_carcass');
-    const checkboxFilm = document.getElementById('podlozhka_film');
-    const costBackgroundOutput = document.getElementById('podlozhka_cost');
-    const costOverallOutput = document.getElementById('leters_podlozhka_cost');
-    const callbackInputDesign = document.getElementById('letter_form_id_design_price');
-    const callbackDesignDuration = document.getElementById('letter_form_id_design_duration');
-    const callbackInputType = document.getElementById('letter_form_id_podlozhka_type');
-    const callbackInputWidth = document.getElementById('letter_form_id_podlozhka_width');
-    const callbackInputHeight = document.getElementById('letter_form_id_podlozhka_height');
-    const callbackInputFrame = document.getElementById('letter_form_id_podlozhka_opt_frame');
-    const callbackInputFilm = document.getElementById('letter_form_id_podlozhka_opt_film');
-    const callbackInputSum = document.getElementById('letter_form_id_podlozhka_sum');
-    const callbackInputTotal = document.getElementById('letter_form_id_podlozhka_total');
-    const widthTooltip = document.createElement('div');
-    const heightTooltip = document.createElement('div');
-    const lettersSumObserver = new MutationObserver(updateLettersTotalCost);
-    const lettersMontageObserver = new MutationObserver(updateLettersTotalCost);
-    const observerConfig = {attributes: true, childList: true, subtree: true};
+        groupFilm,
+        groupBanner,
+        groupCorob,
+        groupLightLetters,
+        groupMore,
+        groupSpectech
+    ];
+    const tripCheckboxes = [
+        document.getElementById('vyezd_na_obekt'),
+        document.getElementById('vyezd_zabor_rk'),
+        document.getElementById('vyezd_proizvobmerov'),
+        document.getElementById('vyezd_diagnostika'),
+    ];
+    const selectsArr = document.querySelectorAll('.select__wrapper select');
 
-    lettersSumObserver.observe(lettersCalculatorCost, observerConfig);
-    lettersMontageObserver.observe(montageCalculatorCost, observerConfig);
+    let tripCost = parseInt(document.getElementById('vyezd_na_obekt').dataset?.price) || 0;
+    let stateTripCost = 0;
 
-    function parseResponseString(string) {
-        let parsed = [];
-        string.split('|').map(params => {
-            let temp = params.split('-');
-            parsed.push({
-                width: parseInt(temp[0]),
-                height: parseInt(temp[1]),
-                price: parseFloat(temp[2]),
-            })
-        })
-        return parsed.reverse()
-    }
+    groupsArr.forEach(group => {
+        //* Проверяем, является ли элемент узлом DOM-дерева, чтоб не упало при вызове .querySelector у undefined
+        if (!(group instanceof HTMLElement)) return;
 
-    function getPriceString(path) {
-        if (import.meta.env.PROD) path = `/udata/custom/readCalc/(${path}).json`;
-        return fetch(path, {
-            method: "GET",
-            credentials: "same-origin",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then(res => res.json())
-            .then(res => res.result)
-            .catch(err => console.error(`Не удалось загрузить данные: ${err.message}`))
-    }
-
-    function initBackgroundCalc() {
-        getPriceString(checkboxFlat.dataset.flat)
-            .then(res => {
-
-                setUpPrice(parseResponseString(res), 'flat');
-
-                rangesliderJs.create(widthRangeInput, {
-                    min: state.flat.minWidth,
-                    max: state.flat.maxWidth,
-                    value: state.flat.minWidth,
-                    step: 1,
-                    onInit: (value) => widthNumberInput.value = value,
-                    onSlide: (value) => handlerWidthRangeInput(value)
-                });
-                rangesliderJs.create(heightRangeInput, {
-                    min: state.flat.minHeight,
-                    max: state.flat.maxHeight,
-                    value: state.flat.minHeight,
-                    step: 1,
-                    onInit: (value) => widthNumberInput.value = value,
-                    onSlide: (value) => handlerHeightRangeInput(value)
-                });
-                addTooltips();
-
-                state.currentPriceList = 'flat';
-                checkboxFlat.click();
-
-            })
-            .catch(err => console.error(err.message));
-    }
-
-    function handlerCheckbox() {
-        const priceName = `${checkboxFlat.checked ? 'flat' : 'cassette'}${checkboxFrame.checked ? '_frame' : ''}${checkboxFilm.checked ? '_film' : ''}`
-        state.currentPriceList = priceName;
-
-        if (!state[priceName].price) {
-            getPriceString(checkboxFlat.dataset[priceName])
-                .then(res => {
-                    setUpPrice(parseResponseString(res), priceName);
-                    calculateBackground();
+        //* Хэндлеры чекбоксов ценовых позиций ('.calc-mr__row')
+        group.querySelectorAll('.checkbox_big-round input')
+            .forEach(checkbox => checkbox.addEventListener('change', () => {
+                handlerPriceRow({
+                    rowDiv: checkbox.closest('.calc-mr__row'),
+                    rowCheckbox: checkbox,
                 })
-                .catch(err => console.error(err.message));
+            }));
+
+        //* Хэндлеры инпутов внутри ценовой позиции
+        group.querySelectorAll('.counter__input')
+            .forEach(counter => counter.addEventListener('input', () => {
+                const rowDiv = counter.closest('.calc-mr__row');
+                const rowCheckbox = rowDiv.querySelector('.checkbox_big-round input');
+
+                if (rowCheckbox?.checked) {
+                    handlerPriceRow({rowDiv, rowCheckbox})
+                }
+            }));
+
+        //* Хэндлеры селектов внутри ценовых позиции
+        group.querySelectorAll('.calc-mr__price-positions select')
+            .forEach(select => select.addEventListener('change', () => {
+                const rowDiv = select.closest('.calc-mr__row');
+                const rowCheckbox = rowDiv.querySelector('.checkbox_big-round input');
+
+                if (rowCheckbox?.checked) {
+                    handlerPriceRow({rowDiv, rowCheckbox})
+                }
+            }))
+
+        //* Хэндлер селекта с повышающим коэффициентом в шапке группы цен '.calc-mr__group'.
+        group.querySelector('.select__coefficient')?.addEventListener('change', () => {
+            group.querySelectorAll('.calc-mr__row')
+                .forEach(rowDiv => {
+                    const rowCheckbox = rowDiv.querySelector('.checkbox_big-round input');
+
+                    if (rowCheckbox?.checked) {
+                        handlerPriceRow({rowDiv, rowCheckbox})
+                    }
+                })
+        })
+    })
+
+    tripCheckboxes.forEach(checkbox => checkbox.addEventListener('change', () => handlerPriceRowTripGroup))
+
+    //* Запускаем плагин кастомных селектов
+    selectsArr.forEach(select => new Choices(select, {
+        searchEnabled: false,
+        itemSelectText: '',
+        allowHTML: false,
+        shouldSort: false
+    }));
+
+    function getDatasetPrice(element) {
+        if ("priceMax" in element.dataset) {
+            return (parseInt(element.dataset.price) + parseInt(element.dataset.priceMax)) / 2
+        }
+        return element.dataset.price
+    }
+
+    function handlerPriceRowTripGroup({rowDiv, rowCheckbox}) {
+        const priceOutput = rowDiv.querySelector('.span-price');
+        function checkTripActive() {
+
+        }
+
+        if (!rowCheckbox.checked) {
+            priceOutput.textContent = 0;
+
+            checkTripActive();
+            calculatePriceGroupSum(rowDiv);
+
             return
         }
 
-        calculateBackground();
+        const price = rowCheckbox.dataset.price;
+        const myTripCost = rowCheckbox.dataset.addTrip
+            ? tripCost
+            : 0;
+        const amountTrips = rowDiv.querySelector('.counter__wrapper.counter_trip .counter__input')
+            ? rowDiv.querySelector('.counter__input').value
+            : 1;
+        const hours = rowDiv.querySelector('.select__hours')
+            ? rowDiv.querySelector('.select__hours').value
+            : 1;
+
+        priceOutput.textContent = ((price * hours + myTripCost) * amountTrips);
+        stateTripCost = 0;
+
+        calculatePriceGroupSum(rowDiv);
     }
 
-    function handlerWidthRangeInput(value) {
-        widthNumberInput.value = value;
-        widthTooltip.textContent = value;
-        calculateBackground();
-    }
+    function handlerPriceRow({rowDiv, rowCheckbox}) {
+        const priceOutput = rowDiv.querySelector('.span-price');
 
-    function handlerHeightRangeInput(value) {
-        heightNumberInput.value = value;
-        heightTooltip.textContent = value;
-        calculateBackground();
-    }
+        if (!rowCheckbox.checked) {
+            priceOutput.textContent = 0;
+            calculatePriceGroupSum(rowDiv);
 
-    function handlerWidthInputNumber(value) {
-        if (value > state.flat.maxWidth) value = state.flat.maxWidth;
-        widthRangeInput['rangeslider-js'].update({value: value});
-        handlerWidthRangeInput(value)
-    }
-
-    function handlerHeightInputNumber(value) {
-        if (value > state.flat.maxHeight) value = state.flat.maxHeight;
-        heightRangeInput['rangeslider-js'].update({value: value});
-        handlerHeightRangeInput(value)
-    }
-
-    function setUpPrice(data, key) {
-        const {min: minWidth, max: maxWidth} = findMinMax(data, 'width');
-        const {min: minHeight, max: maxHeight} = findMinMax(data, 'height');
-
-        Object.assign(state[key], {
-            price: data,
-            minWidth: minWidth,
-            maxWidth: maxWidth,
-            minHeight: minHeight,
-            maxHeight: maxHeight,
-        })
-
-        // state = {
-        //     ...state,
-        //     [key]: {
-        //         price: data,
-        //         minWidth: minWidth,
-        //         maxWidth: maxWidth,
-        //         minHeight: minHeight,
-        //         maxHeight: maxHeight,
-        //     }
-        // }
-    }
-
-    function calculateBackground() {
-        state.podlozhkaCost = findPrice(state.currentPriceList);
-        printCostBackground();
-        fillCallbackForm();
-    }
-
-    // Для стабильности оборачиваем заполнение формы обратной связи в try/catch на случай изменения шаблона
-    function fillCallbackForm() {
-        try {
-            callbackInputType.value = checkboxFlat.checked ? 'ПВХ и акрил' : 'Фигурный'
-            callbackInputWidth.value = widthRangeInput.value;
-            callbackInputHeight.value = heightRangeInput.value;
-            callbackInputFrame.value = checkboxFrame.checked ? 'Да' : 'Нет';
-            callbackInputFilm.value = checkboxFilm.checked ? 'Да' : 'Нет';
-            callbackInputSum.value = state.podlozhkaCost;
-            callbackInputTotal.value = `Общая стоимость, включая подложку: ${getCleanNumber(lettersCalculatorTotal.textContent) + parseInt(state.podlozhkaCost)}`;
-        } catch {
-            console.error('Отсутствуют необходимые поля для заполнения формы обратной связи')
-        }
-    }
-
-
-    function findPrice(priceName = '') {
-        return state[priceName]?.price?.find(({width, height}) => {
-            return width <= widthRangeInput.value && height <= heightRangeInput.value
-        }).price || 0
-    }
-
-    function addTooltips() {
-        widthRangeInput.closest('div').querySelector('.rangeslider__handle').append(widthTooltip);
-        widthTooltip.classList.add('rangeslider__tooltip');
-        widthTooltip.textContent = widthRangeInput.value;
-        heightRangeInput.closest('div').querySelector('.rangeslider__handle').append(heightTooltip);
-        heightTooltip.classList.add('rangeslider__tooltip');
-        heightTooltip.textContent = heightRangeInput.value;
-    }
-
-    function printCostBackground() {
-        const lettersCost = lettersCalculatorTotal.textContent;
-        costOverallOutput.textContent = (getCleanNumber(lettersCost) + parseInt(state.podlozhkaCost)).toString();
-        costBackgroundOutput.textContent = state.podlozhkaCost;
-    }
-
-    buttonPodlozhka.addEventListener('click', () => {
-        backgroundCalculator.classList.toggle('active');
-        if (!widthRangeInput.closest('div').querySelector('.rangeslider')) initBackgroundCalc();
-
-        printCostBackground();
-
-        if (!buttonPodlozhka.checked) {
-            backgroundCalculator.classList.remove('active');
-
-            try {
-                [
-                    callbackInputType,
-                    callbackInputWidth,
-                    callbackInputHeight,
-                    callbackInputFrame,
-                    callbackInputFilm,
-                    callbackInputSum,
-                ].forEach(input => input.value = '')
-            } catch {
-                console.error('Отсутствуют необходимые поля для заполнения формы обратной связи')
-            }
-        }
-    })
-    widthNumberInput.addEventListener('input', e => handlerWidthInputNumber(e.target.value));
-    heightNumberInput.addEventListener('input', e => handlerHeightInputNumber(e.target.value));
-    [checkboxFlat, checkboxFrame, checkboxCassette, checkboxFilm]
-        .forEach(checkbox => checkbox.addEventListener('change', () => handlerCheckbox()));
-
-
-    /**
-     * Слайдер "Дизайн"
-     *
-     */
-
-    const designRangeInput = document.getElementById('letters_design');
-    const designPrice = parseInt(designRangeInput.dataset.design_price);
-    const designMinutesInterval = parseInt(designRangeInput.dataset.design_interval);
-    const designMaxIntervals = parseInt(designRangeInput.dataset.design_amount_intervals);
-    const designHint = designRangeInput.closest('div').querySelector('.letters__calc__hint');
-    const inputDesignSlider = document.getElementById('letters_design_input');
-    const designCostOutput = document.getElementById('print__let__design');
-
-    rangesliderJs.create(designRangeInput, {
-        min: 0,
-        max: designMaxIntervals,
-        value: 0,
-        step: 1,
-        onSlide: (value) => handlerDesignRangeInput(value)
-    });
-
-    inputDesignSlider.addEventListener('input', e => {
-        const value = e.currentTarget.value;
-        if (value > designMaxIntervals) return;
-
-        designRangeInput['rangeslider-js'].update({value: value});
-        handlerDesignRangeInput(value)
-    });
-    addInputNumberControls(document.querySelectorAll('.letters__calc__design .counter__wrapper'));
-
-    function handlerDesignRangeInput(value) {
-        const designCurrentSum = designPrice * value;
-
-        if (typeof value !== 'number') value = Number(value);
-
-        if (inputDesignSlider.value !== value) inputDesignSlider.value = value;
-        designCostOutput.textContent = designCurrentSum.toLocaleString();
-        if (callbackInputDesign) callbackInputDesign.value = designCurrentSum;
-        if (callbackDesignDuration) callbackDesignDuration.value = `${designMinutesInterval * value} минут`;
-
-        if (value === 0) {
-            designHint.textContent = 'Работа дизайнера не требуется'
-        } else {
-            const minutes = (value * designMinutesInterval) % 60;
-            const minutesText = minutes === 0 ? '' : `${minutes} минут `;
-
-            const hours = (value * designMinutesInterval) / 60;
-            let hoursText = '';
-            if (hours === 1) hoursText = '1 час ';
-            if (hours > 1) hoursText = `${Math.floor(hours)}ч `;
-
-            designHint.textContent = `${designCurrentSum} рублей, ${hoursText}${minutesText} работы дизайнера`;
+            return
         }
 
-        updateLettersTotalCost()
+        const price = getDatasetPrice(rowCheckbox);
+        //* Если у чекбокса имеется атрибут data-add-trip, то добавляем к стоимости цену выезда
+        const myTripCost = rowCheckbox.dataset.addTrip
+            ? stateTripCost
+            : 0;
+        //* amountTrips - Количество выездов
+        const amountTrips = rowDiv.querySelector('.counter__wrapper.counter_trip .counter__input')
+            ? rowDiv.querySelector('.counter__input').value
+            : 1;
+        //* amount - Выбираем счётчики, которые НЕ счётчики блоков и НЕ счётчики выездов
+        const amount = rowDiv.querySelector('.counter__wrapper:not(.counter_trip, .sufx_block) .counter__input')
+            ? rowDiv.querySelector('.counter__input').value
+            : 1;
+        //* blocks количество блоков (в одном блоке 3кв.м)
+        const blocks = rowDiv.querySelector('.counter__wrapper.sufx_block .counter__input')
+            ? (rowDiv.querySelector('.counter__input').value * 3)
+            : 1;
+        const hours = rowDiv.querySelector('.select__hours')
+            ? rowDiv.querySelector('.select__hours').value
+            : 1;
+        const labourShift = rowDiv.querySelector('.select__smena')
+            ? rowDiv.querySelector('.select__smena').value
+            : 1;
+        const increasingCoefficient = rowCheckbox.dataset.coefficient
+            ? parseFloat(rowDiv.closest('.calc-mr__group').querySelector('.select__coefficient').value)
+            : 1;
+
+        priceOutput.textContent = ((price * hours * amount * blocks * labourShift * increasingCoefficient + myTripCost) * amountTrips);
+
+        calculatePriceGroupSum(rowDiv);
     }
 
-    function updateLettersTotalCost() {
-        const callbackTotalInput = document.getElementById('letter_form_id_letters_total');
-        const lettersTotalCost = getCleanNumber(lettersCalculatorCost.textContent);
-        const montageCost = getCleanNumber(montageCalculatorCost.textContent);
-        const designCost = getCleanNumber(designCostOutput.textContent);
+    function calculatePriceGroupSum(groupInnerElement) {
+        const group = groupInnerElement.closest('.calc-mr__group');
+        const groupSumOutput = group.querySelector('.calc-mr__group__footer .span-price');
 
-        const totalCost = lettersTotalCost + montageCost + designCost;
+        let sum = 0;
+        group.querySelectorAll('.calc-mr__price-positions .span-price')
+            .forEach(spanPrice => sum += parseInt(spanPrice.textContent));
 
-        lettersCalculatorTotal.textContent = totalCost.toLocaleString();
-        if (callbackTotalInput) callbackTotalInput.value = totalCost;
-        if (buttonPodlozhka.checked) printCostBackground();
+        groupSumOutput.textContent = sum.toString();
+
+        calculateTotalSum()
     }
 
-    /**
-     * Конец слайдера "Дизайн"
-     */
+    function calculateTotalSum() {
+        const totalOutput = document.getElementById('total_sum_mr');
+
+        let sum = 0;
+        document.querySelectorAll('.calc-mr__group__footer .span-price')
+            .forEach(spanPrice => sum += parseInt(spanPrice.textContent));
+
+        totalOutput.textContent = sum.toString();
+    }
 
     /**
      * Обработчик кнопок +/- у числовых инпутов в указанной обёртке
      * @param wrappersArr - HTMLCollection элементов-обёрток (в д/случае .counter__wrapper)
      */
 
-    addInputNumberControls(document.querySelectorAll('.podlozhka__more .counter__wrapper'))
+    addInputNumberControls(document.querySelectorAll('.calc-mr .counter__wrapper'));
 
     function addInputNumberControls(wrappersArr) {
         const event = new InputEvent("input", {
@@ -403,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Конец обработчика кнопок +/-
      */
-
 })
 
 

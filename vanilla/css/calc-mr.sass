@@ -1,0 +1,322 @@
+$theme-color: #40BE65
+$button-border: #414549
+$bg_dark: #2B2F34
+
+.counter__wrapper
+  &.sufx
+    &_sq-m
+      position: relative
+      input
+        min-width: 80px
+        padding-right: 40px
+        text-align: end
+      &::after
+        content: 'м.кв'
+        position: absolute
+        top: 9px
+        right: 32px
+        width: 34px
+        height: 20px
+    &_p-m
+      position: relative
+      input
+        min-width: 80px
+        padding-right: 36px
+        text-align: end
+      &::after
+        content: 'м.п'
+        position: absolute
+        top: 9px
+        right: 28px
+        width: 30px
+        height: 20px
+    &_block
+      position: relative
+      input
+        min-width: 96px
+        padding-right: 48px
+        text-align: end
+      &::after
+        content: 'блок.'
+        position: absolute
+        top: 9px
+        right: 36px
+        width: 36px
+        height: 20px
+    &_km
+      position: relative
+      input
+        min-width: 96px
+        padding-right: 36px
+        text-align: end
+      &::after
+        content: 'км'
+        position: absolute
+        top: 9px
+        right: 28px
+        width: 30px
+        height: 20px
+
+.calc-mr
+  background-color: $bg_dark
+  color: white
+  font-family: 'Circe', sans-serif
+
+  &__group
+    margin-bottom: 40px
+    padding: 30px
+    border: 1px solid #4E555E
+    -webkit-border-radius: 8px
+    -moz-border-radius: 8px
+    border-radius: 8px
+    &__header
+      margin-bottom: 40px
+      display: flex
+      gap: 16px
+      justify-content: space-between
+    &__footer
+      margin: 0 -30px
+      padding: 24px 30px 0 30px
+      border-top: 1px solid #4E555E
+      font-weight: 700
+      font-size: 20px
+      line-height: 20px
+      text-align: right
+      letter-spacing: -0.1px
+
+  &__row
+    margin-bottom: 32px
+    display: flex
+    justify-content: space-between
+    align-items: center
+    gap: 16px
+
+    &__block
+      &_left
+        display: flex
+        align-items: center
+
+      &_right
+        display: flex
+        align-items: center
+
+    .checkbox_big-round
+      margin-right: 24px
+
+  &__description
+    max-width: 600px
+    font-weight: 400
+    font-size: 20px
+    line-height: 28px
+
+  &__price-wrapper
+    min-width: 100px
+    font-size: 16px
+    line-height: 20px
+    letter-spacing: -0.1px
+    text-align: right
+  .span-price
+    margin-right: 4px
+  .select
+    &__wrapper
+      margin-left: 24px
+      min-width: 112px
+      &_smena
+        min-width: 160px
+  input
+    font-family: 'Circe', sans-serif
+    font-weight: 400
+    font-size: 16px
+    &[type="number"]
+      -moz-appearance: textfield
+      &::-webkit-outer-spin-button, &::-webkit-inner-spin-button
+        -webkit-appearance: none
+        margin: 0
+
+
+.checkbox
+  &_big-round
+    .checkbox
+      &__toggle
+        display: block
+        position: relative
+        width: 65px
+        height: 40px
+        background-color: #4F5357
+        -moz-transition: background-color 0.4s ease 0s
+        -o-transition: background-color 0.4s ease 0s
+        -webkit-transition: background-color 0.4s ease 0s
+        transition: background-color 0.4s ease 0s
+        -webkit-border-radius: 20px
+        -moz-border-radius: 20px
+        border-radius: 20px
+        cursor: pointer
+
+        &__marker
+          display: block
+          position: absolute
+          top: 2px
+          left: 2px
+          right: auto
+          bottom: 2px
+          width: 36px
+          height: 36px
+          background-color: #ffffff
+          -webkit-border-radius: 50%
+          -moz-border-radius: 50%
+          border-radius: 50%
+          -moz-transition: left 0.4s ease 0s
+          -o-transition: left 0.4s ease 0s
+          -webkit-transition: left 0.4s ease 0s
+          transition: left 0.4s ease 0s
+
+    input[type=checkbox]
+      position: absolute
+      width: 1px
+      height: 1px
+      margin: -1px
+      border: 0
+      padding: 0
+      white-space: nowrap
+      clip-path: inset(100%)
+      clip: rect(0 0 0 0)
+      overflow: hidden
+
+      &:checked ~ label .checkbox__toggle
+        background-color: $theme-color
+
+        .checkbox__toggle__marker
+          left: calc(100% - 38px)
+
+.counter
+  &__wrapper
+    display: flex
+
+  &__btn
+    width: 30px
+    height: 40px
+    border: 2px solid $button-border
+    background-color: rgba(78, 85, 94, .2)
+    cursor: pointer
+    color: #9ea2a7
+
+  &__increment
+    border-left: none
+    border-radius: 0 20px 20px 0
+    padding-right: 10px
+
+  &__decrement
+    border-right: none
+    border-radius: 20px 0 0 20px
+    padding-left: 8px
+
+  &__input
+    margin: 0
+    width: 50px
+    font-size: 20px
+    font-family: Circe, sans-serif
+    color: #fff
+    line-height: 1
+    border: 2px solid rgba(155, 155, 155, .2)
+    border-left: none
+    border-right: none
+    display: inline-flex
+    justify-content: center
+    align-items: center
+    text-align: center
+    -webkit-border-radius: 0
+    -moz-border-radius: 0
+    border-radius: 0
+    background-color: #2B2F34
+
+
+.choices
+  background-color: inherit
+  -webkit-border-radius: 20px
+  -moz-border-radius: 20px
+  border-radius: 20px
+  &__list--dropdown, &__list[aria-expanded]
+    background-color: $bg_dark
+    border: 2px solid $button-border
+    border-top: none
+    border-radius: 0 0 20px 20px
+    color: #9B9B9B
+  &__list--dropdown .choices__list, .choices__list[aria-expanded] .choices__list
+    max-height: 420px
+  &__list--dropdown .choices__item, .choices__list[aria-expanded] .choices__item
+    font-family: 'Circe', sans-serif
+    font-weight: 400
+    font-size: 16px
+  &__list--dropdown .choices__item--selectable.is-highlighted, .choices__list[aria-expanded] .choices__item--selectable.is-highlighted
+    color: white
+    background-color: $button-border
+    border: none
+  &__inner
+    padding: 6px 10px 4px
+    height: 42px
+    min-height: unset
+    border: 2px solid $button-border
+    background-color: inherit
+    text-align: center
+    font-family: 'Circe', sans-serif
+    font-weight: 400
+    font-size: 16px
+    line-height: 19px
+    -webkit-border-radius: 20px
+    -moz-border-radius: 20px
+    border-radius: 20px
+  &[data-type*=select-one]::after
+    margin-top: -12px
+    content: url('../css/icons/arrow_sel.svg')
+    width: 12px
+    border: none
+  &[data-type*=select-one].is-open::after
+    margin-top: -12px
+
+.is-open .choices__inner
+  border-radius: 20px 20px 0 0
+
+.is-focused .choices__inner
+  border: 2px solid $button-border
+
+.is-open .choices__list--dropdown, .is-open .choices__list[aria-expanded]
+  border-color: $button-border
+  box-shadow: 0 6px 12px #111519
+
+.azt_tooltip
+  position: relative
+  .tooltip
+    &__popover
+      padding: 8px 12px
+      min-width: 136px
+      position: absolute
+      top: -12px
+      right: 0
+      opacity: 0
+      transition: transform 0.3s ease-in-out, opacity 0.3s
+      background-color: #4E555D
+      -webkit-border-radius: 8px
+      -moz-border-radius: 8px
+      border-radius: 8px
+      pointer-events: none
+      &__text
+        font-family: inherit
+        font-weight: 400
+        font-size: 16px
+        line-height: 20px
+        letter-spacing: -0.2px
+        text-align: center
+    &__icon
+      cursor: pointer
+  &:hover
+    .tooltip__popover
+      opacity: 1
+      transform: translateY(-100%)
+
+@media (min-width: 640px)
+  .choices__list--dropdown .choices__item--selectable, .choices__list[aria-expanded] .choices__item--selectable
+    padding: 8px 12px
+
+@media (max-width: 640px)
+  .calc-mr__row
+    flex-flow: column
