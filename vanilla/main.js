@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const groupSpectech = document.querySelector('.calc-mr__group_spectech');
 
     const groupsArr = [
-
         groupFilm,
         groupBanner,
         groupCorob,
@@ -16,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         groupMore,
         groupSpectech
     ];
-    const tripCheckboxes = [
+    const tripCheckboxesArr = [
         document.getElementById('vyezd_na_obekt'),
         document.getElementById('vyezd_zabor_rk'),
         document.getElementById('vyezd_proizvobmerov'),
@@ -24,9 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     const selectsArr = document.querySelectorAll('.select__wrapper select');
 
-    let tripCost = parseInt(document.getElementById('vyezd_na_obekt').dataset?.price) || 0;
-    let stateTripCost = 0;
+    const tripCost = parseInt(document.getElementById('vyezd_na_obekt').dataset?.price) || 0;
+    let stateTripCost = tripCost;
 
+    //* Хэндлеры для всех категорий, кроме "Выезды"
     groupsArr.forEach(group => {
         //* Проверяем, является ли элемент узлом DOM-дерева, чтоб не упало при вызове .querySelector у undefined
         if (!(group instanceof HTMLElement)) return;
@@ -75,7 +75,42 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
-    tripCheckboxes.forEach(checkbox => checkbox.addEventListener('change', () => handlerPriceRowTripGroup))
+    //* Хэндлеры категории "Выезды" (без "Ремонт вывески")
+    tripCheckboxesArr.forEach(checkbox => {
+        const rowDiv = checkbox.closest('.calc-mr__row');
+
+        checkbox.addEventListener('change', () => {
+            handlerPriceRowTripGroup({ rowDiv, rowCheckbox: checkbox})
+        })
+
+        rowDiv.querySelector('.counter__input')?.addEventListener('input', () => {
+            if (checkbox.checked) {
+                handlerPriceRowTripGroup({rowDiv, rowCheckbox: checkbox})
+            }
+        })
+
+        rowDiv.querySelector('.select__hours')?.addEventListener('change', () => {
+            if (checkbox.checked) {
+                handlerPriceRowTripGroup({rowDiv, rowCheckbox: checkbox})
+            }
+        })
+    })
+
+    //* Хэндлеры ценовой позиции "Ремонт вывески" категории "Выезды"
+    function initRemontVyveskiHandlers() {
+        const checkbox = document.getElementById('remont_vyveski');
+        const rowDiv = checkbox.closest('.calc-mr__row');
+
+        checkbox.addEventListener('change', () => {
+            handlerPriceRow({ rowDiv, rowCheckbox: checkbox})
+        })
+        rowDiv.querySelector('.select__hours')?.addEventListener('change', () => {
+            if (checkbox.checked) {
+                handlerPriceRow({rowDiv, rowCheckbox: checkbox})
+            }
+        })
+    }
+    initRemontVyveskiHandlers();
 
     //* Запускаем плагин кастомных селектов
     selectsArr.forEach(select => new Choices(select, {
@@ -92,16 +127,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return element.dataset.price
     }
 
+    function setStateTripCost() {
+        if (!tripCheckboxesArr.some(checkbox => checkbox.checked)) {
+            stateTripCost = tripCost;
+        }
+    }
+
     function handlerPriceRowTripGroup({rowDiv, rowCheckbox}) {
         const priceOutput = rowDiv.querySelector('.span-price');
-        function checkTripActive() {
-
-        }
 
         if (!rowCheckbox.checked) {
             priceOutput.textContent = 0;
 
-            checkTripActive();
+            setStateTripCost();
             calculatePriceGroupSum(rowDiv);
 
             return
