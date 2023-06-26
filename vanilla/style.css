@@ -337,6 +337,32 @@
   transform: translateY(-100%);
 }
 
+.a3t__window {
+  padding: 8px 16px 4px;
+  position: fixed;
+  right: 100px;
+  top: 50vh;
+  color: #FFF;
+  background-color: #4E555D;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px 2px #111111;
+}
+.a3t__output {
+  font-size: 24px;
+  font-family: Circe, sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.1px;
+}
+.a3t__postfix {
+  margin-left: 4px;
+  font-size: 20px;
+  font-family: Circe, sans-serif;
+  font-weight: 500;
+}
+
 @media (min-width: 640px) {
   .choices__list--dropdown .choices__item--selectable, .choices__list[aria-expanded] .choices__item--selectable {
     padding: 8px 12px;

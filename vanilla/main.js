@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectsArr = document.querySelectorAll('.select__wrapper select');
 
     const tripCost = parseInt(document.getElementById('vyezd_na_obekt').dataset?.price) || 0;
-    let stateTripCost = tripCost;
+    const {output: flyingOutput} = createFlyingOutput({initValue: '0', postfix: '₽'})
 
     //* Хэндлеры для всех категорий, кроме "Выезды"
     groupsArr.forEach(group => {
@@ -120,16 +120,15 @@ document.addEventListener('DOMContentLoaded', () => {
         shouldSort: false
     }));
 
-    function getDatasetPrice(element) {
-        if ("priceMax" in element.dataset) {
-            return (parseInt(element.dataset.price) + parseInt(element.dataset.priceMax)) / 2
-        }
-        return element.dataset.price
-    }
+    // function setStateTripCost() {
+    //     if (!tripCheckboxesArr.some(checkbox => checkbox.checked)) {
+    //         stateTripCost = tripCost;
+    //     }
+    // }
 
-    function setStateTripCost() {
+    function addTripCost() {
         if (!tripCheckboxesArr.some(checkbox => checkbox.checked)) {
-            stateTripCost = tripCost;
+            document.getElementById('vyezd_na_obekt').click()
         }
     }
 
@@ -139,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!rowCheckbox.checked) {
             priceOutput.textContent = 0;
 
-            setStateTripCost();
             calculatePriceGroupSum(rowDiv);
 
             return
@@ -156,8 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ? rowDiv.querySelector('.select__hours').value
             : 1;
 
-        priceOutput.textContent = ((price * hours + myTripCost) * amountTrips);
-        stateTripCost = 0;
+        priceOutput.textContent = formatNumber((price * hours + myTripCost) * amountTrips);
 
         calculatePriceGroupSum(rowDiv);
     }
@@ -171,12 +168,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
             return
         }
-
-        const price = getDatasetPrice(rowCheckbox);
         //* Если у чекбокса имеется атрибут data-add-trip, то добавляем к стоимости цену выезда
-        const myTripCost = rowCheckbox.dataset.addTrip
-            ? stateTripCost
-            : 0;
+        if (rowCheckbox.dataset.addTrip) addTripCost();
+
+        // const price = getDatasetPrice(rowCheckbox);
+        // //* amountTrips - Количество выездов
+        // const amountTrips = rowDiv.querySelector('.counter__wrapper.counter_trip .counter__input')
+        //     ? rowDiv.querySelector('.counter__input').value
+        //     : 1;
+        // //* amount - Выбираем счётчики, которые НЕ счётчики блоков и НЕ счётчики выездов
+        // const amount = rowDiv.querySelector('.counter__wrapper:not(.counter_trip, .sufx_block) .counter__input')
+        //     ? rowDiv.querySelector('.counter__input').value
+        //     : 1;
+        // //* blocks количество блоков (в одном блоке 3кв.м)
+        // const blocks = rowDiv.querySelector('.counter__wrapper.sufx_block .counter__input')
+        //     ? (rowDiv.querySelector('.counter__input').value * 3)
+        //     : 1;
+        // const hours = rowDiv.querySelector('.select__hours')
+        //     ? rowDiv.querySelector('.select__hours').value
+        //     : 1;
+        // const labourShift = rowDiv.querySelector('.select__smena')
+        //     ? rowDiv.querySelector('.select__smena').value
+        //     : 1;
+        // const increasingCoefficient = rowCheckbox.dataset.coefficient
+        //     ? parseFloat(rowDiv.closest('.calc-mr__group').querySelector('.select__coefficient').value)
+        //     : 1;
+
+        if ((rowCheckbox.dataset.priceFirst)) {
+            priceOutput.textContent = getNonlinearCostSum({rowDiv, rowCheckbox})
+        } else {
+            priceOutput.textContent = getCommonSum({rowDiv, rowCheckbox})
+        }
+
+        // priceOutput.textContent = formatNumber(price * hours * amount * blocks * labourShift * increasingCoefficient);
+
+        calculatePriceGroupSum(rowDiv);
+    }
+
+    function getCommonSum({rowDiv, rowCheckbox}) {
+        const price = getDatasetPrice(rowCheckbox);
         //* amountTrips - Количество выездов
         const amountTrips = rowDiv.querySelector('.counter__wrapper.counter_trip .counter__input')
             ? rowDiv.querySelector('.counter__input').value
@@ -199,9 +229,11 @@ document.addEventListener('DOMContentLoaded', () => {
             ? parseFloat(rowDiv.closest('.calc-mr__group').querySelector('.select__coefficient').value)
             : 1;
 
-        priceOutput.textContent = ((price * hours * amount * blocks * labourShift * increasingCoefficient + myTripCost) * amountTrips);
+        return formatNumber(price * hours * amount * blocks * labourShift * increasingCoefficient);
+    }
 
-        calculatePriceGroupSum(rowDiv);
+    function getNonlinearCostSum({rowDiv, rowCheckbox}) {
+
     }
 
     function calculatePriceGroupSum(groupInnerElement) {
@@ -210,9 +242,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let sum = 0;
         group.querySelectorAll('.calc-mr__price-positions .span-price')
-            .forEach(spanPrice => sum += parseInt(spanPrice.textContent));
+            .forEach(spanPrice => sum += cleanCostNumber(spanPrice.textContent));
 
-        groupSumOutput.textContent = sum.toString();
+        groupSumOutput.textContent = formatNumber(sum);
 
         calculateTotalSum()
     }
@@ -222,9 +254,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let sum = 0;
         document.querySelectorAll('.calc-mr__group__footer .span-price')
-            .forEach(spanPrice => sum += parseInt(spanPrice.textContent));
+            .forEach(spanPrice => sum += cleanCostNumber(spanPrice.textContent));
 
-        totalOutput.textContent = sum.toString();
+        const value = formatNumber(sum)
+
+        totalOutput.textContent = value;
+        flyingOutput.textContent = value;
+    }
+
+    function getDatasetPrice(element) {
+        if ("priceMax" in element.dataset) {
+            return (parseInt(element.dataset.price) + parseInt(element.dataset.priceMax)) / 2
+        }
+        return element.dataset.price
+    }
+
+    function cleanCostNumber(value) {
+        return Number(value.replace(/\s/, ''))
+    }
+
+    const formatter = new Intl.NumberFormat("ru-RU", {})
+    function formatNumber(value) {
+        return formatter.format(Number(value))
+    }
+
+    /**
+     *
+     * @param postfix строка, после output`а. Заполняется при инициализации
+     * @param initValue - начальное значение
+     * @returns {{output: HTMLSpanElement}} output - вывод информации
+     */
+    function createFlyingOutput({initValue = '', postfix = '' }) {
+        const windowDiv = document.createElement('div');
+        const outputSpan = document.createElement('span');
+        const postfixSpan = document.createElement('span');
+
+        windowDiv.classList.add('a3t__window');
+        outputSpan.classList.add('a3t__output');
+        postfixSpan.classList.add('a3t__postfix');
+
+        outputSpan.textContent = initValue;
+        postfixSpan.textContent = postfix;
+
+        windowDiv.append(outputSpan, postfixSpan)
+        document.body.append(windowDiv)
+
+        return {output: outputSpan}
     }
 
     /**
